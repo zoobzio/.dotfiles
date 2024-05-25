@@ -6,6 +6,23 @@ return {
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			lspconfig.tsserver.setup({
 				capabilities = capabilities,
+        init_options = {
+          plugins = {
+            {
+              name = "@vue/typescript-plugin",
+              location = "/opt/homebrew/lib/node_modules/@vue/typescript-plugin",
+              languages = {"javascript", "typescript", "vue"},
+            },
+          },
+        },
+        filetypes = {
+          "javascript",
+          "typescript",
+          "vue",
+        },
+			})
+      lspconfig.volar.setup({
+				capabilities = capabilities,
 			})
 			lspconfig.pyright.setup({
 				capabilities = capabilities,
@@ -14,9 +31,6 @@ return {
 				capabilities = capabilities,
 			})
 			lspconfig.lua_ls.setup({
-				capabilities = capabilities,
-			})
-			lspconfig.vuels.setup({
 				capabilities = capabilities,
 			})
 		end,

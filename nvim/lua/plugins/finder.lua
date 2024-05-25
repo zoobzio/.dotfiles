@@ -32,7 +32,7 @@ return {
 					respect_gitignore = false,
 					hidden = true,
 					grouped = true,
-					dir_icon = "🖿",
+					dir_icon = "",
 					git_status = false,
 					initial_mode = "normal",
 				},
