@@ -56,7 +56,7 @@ local function setup_formatter()
 	local formatGroup = vim.api.nvim_create_augroup("FormatGroup", { clear = true })
 	vim.api.nvim_create_autocmd(
 		{ "BufWritePre" },
-		{ pattern = "*.vue,*.ts,*.js,*.json,*.yaml,*.lua,*.go,*.py", command = "Neoformat", group = formatGroup }
+		{ pattern = "*.vue,*.ts,*.js,*.mjs,*,cjs,*.json,*.yaml,*.lua,*.go,*.py", command = "Neoformat", group = formatGroup }
 	)
 end
 
