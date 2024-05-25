@@ -1,7 +1,7 @@
 return {
 	misc = {
 		dots = "󰇘",
-		search = "🔍",
+		search = "󰍉",
 		cog = "⚙",
 	},
 	dap = {
@@ -14,7 +14,7 @@ return {
 	diagnostics = {
 		Error = " ",
 		Warn = " ",
-		Hint = " ",
+		Hint = " ",
 		Info = " ",
 		Debug = " ",
 		Trace = "✎ ",

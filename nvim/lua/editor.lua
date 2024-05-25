@@ -31,7 +31,7 @@ local function setup_theme()
     hi FloatBorder guifg='#3c3836'
 
     hi GitSignsAdd guibg='#3c3836' guifg='#b8bb26'
-    hi GitSignsChange guibg='#3c3836' guifg='#fadb2f'
+    hi GitSignsChange guibg='#3c3836' guifg='#fe8019'
     hi GitSignsDelete guibg='#3c3836' guifg='#fb4934'
 
     hi DiagnosticSignError guibg='#3c3836' guifg='#fb4934'
