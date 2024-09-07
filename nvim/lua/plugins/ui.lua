@@ -2,7 +2,16 @@ local icons = require("config.icons")
 
 return {
 	-- theme
-	"gruvbox-community/gruvbox",
+	--"gruvbox-community/gruvbox",
+  {
+    "scottmckendry/cyberdream.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      transparent = true,
+      italic_comments = true,
+    }
+  },
 
 	-- icons
 	"kyazdani42/nvim-web-devicons",

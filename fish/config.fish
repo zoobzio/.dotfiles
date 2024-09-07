@@ -1,14 +1,20 @@
-# list folder contents
-if type -q eza
-  alias ll "eza -l -g --icons"
+function fish_greeting
+    echo "
+██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗    ██████╗  █████╗  ██████╗██╗  ██╗       ██████╗ ██╗████████╗ ██████╗██╗  ██╗   
+██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝    ██╔══██╗██╔══██╗██╔════╝██║ ██╔╝       ██╔══██╗██║╚══██╔══╝██╔════╝██║  ██║   
+██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗      ██████╔╝███████║██║     █████╔╝        ██████╔╝██║   ██║   ██║     ███████║   
+██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝      ██╔══██╗██╔══██║██║     ██╔═██╗        ██╔══██╗██║   ██║   ██║     ██╔══██║   
+╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗    ██████╔╝██║  ██║╚██████╗██║  ██╗▄█╗    ██████╔╝██║   ██║   ╚██████╗██║  ██║██╗
+ ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝    ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝    ╚═════╝ ╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝╚═╝
+"
 end
 
-# size of directory
-alias sizeof "du -hs"
+begin
+    eval (ssh-agent -c)
+end &>/dev/null
 
-# pnpm
-set -gx PNPM_HOME "/Users/alex.thorwaldson/Library/pnpm"
-if not string match -q -- $PNPM_HOME $PATH
-  set -gx PATH "$PNPM_HOME" $PATH
-end
-# pnpm end
+alias ll "eza -l --icons --git"
+alias clip "xclip -selection clipboard"
+alias dock lazydocker
+
+starship init fish | source

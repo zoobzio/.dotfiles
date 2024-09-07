@@ -1,18 +1,18 @@
 local colors = {
 	bg = "None",
-	bg1 = "#3c3836",
-	bg2 = "#504945",
-	gray = "#928374",
-	fg = "#ebdbb2",
-	yellow = "#fabd2f",
-	cyan = "#83a598",
-	darkblue = "#076678",
-	green = "#b8bb26",
-	orange = "#fe8019",
-	violet = "#d3869b",
-	magenta = "#b16286",
-	blue = "#458588",
-	red = "#fb4934",
+	bg1 = "#1e2124",
+	bg2 = "#3c4048",
+	gray = "#7b8496",
+	fg = "#ffffff",
+	yellow = "#f1ff5e",
+	cyan = "#5ef1ff",
+	blue = "#5ea1ff",
+	green = "#5eff6c",
+	orange = "#ffbd5e",
+	violet = "#bd5eff",
+	magenta = "#ff5ef1",
+	pink = "#ff5ea0",
+	red = "#ff6e5e",
 }
 
 -- Selects a color based on neovims mode
@@ -75,15 +75,6 @@ return {
 						padding = { left = 2, right = 2 },
 					},
 					{
-						function()
-							return ""
-						end,
-						color = function()
-							return { fg = mode_color(), bg = colors.bg2 }
-						end,
-						padding = { left = 0, right = 0 },
-					},
-					{
 						"filename",
 						color = { fg = colors.magenta, bg = colors.bg2, gui = "bold" },
 					},
@@ -98,21 +89,7 @@ return {
 						},
 						color = { bg = colors.bg2 },
 					},
-					{
-						function()
-							return ""
-						end,
-						color = { fg = colors.bg2, bg = colors.bg1 },
-						padding = { left = 0, right = 0 },
-					},
 					{ "progress" },
-					{
-						function()
-							return ""
-						end,
-						color = { fg = colors.bg2 },
-						padding = { left = 0, right = 0 },
-					},
 					{ "location" },
 				},
 				lualine_x = {
@@ -122,31 +99,12 @@ return {
 						color = { fg = colors.fg },
 					},
 					{
-						function()
-							return ""
-						end,
-						color = { fg = colors.bg2, bg = colors.bg1 },
-					},
-					{
 						"fileformat",
 						fmt = string.upper,
 						icons_enabled = false,
 						color = { fg = colors.fg },
 					},
-					{
-						function()
-							return ""
-						end,
-						color = { fg = colors.bg2, bg = colors.bg1 },
-					},
 					{ "filetype" },
-					{
-						function()
-							return ""
-						end,
-						color = { fg = colors.bg2, bg = colors.bg1 },
-						padding = { left = 0, right = 0 },
-					},
 					{
 						"diff",
 						symbols = { added = " ", modified = " ", removed = " " },
@@ -158,15 +116,6 @@ return {
 						color = { bg = colors.bg2 },
 					},
 					{ "branch", color = { fg = colors.magenta, bg = colors.bg2, gui = "bold" } },
-					{
-						function()
-							return ""
-						end,
-						color = function()
-							return { fg = mode_color(), bg = colors.bg2, gui = "bold" }
-						end,
-						padding = { left = 0, right = 0 },
-					},
 					{
 						"datetime",
 						style = "%H:%M:%S",
@@ -189,15 +138,6 @@ return {
 						padding = { left = 2, right = 2 },
 					},
 					{
-						function()
-							return ""
-						end,
-						color = function()
-							return { fg = mode_color(), bg = colors.bg2 }
-						end,
-						padding = { left = 0, right = 0 },
-					},
-					{
 						"buffers",
 						icons_enabled = false,
 						mode = 2,
@@ -211,22 +151,8 @@ return {
 						},
 						color = { bg = colors.bg2 },
 					},
-					{
-						function()
-							return ""
-						end,
-						color = { fg = colors.bg2, bg = colors.bg1 },
-						padding = { left = 0, right = 0 },
-					},
 				},
 				lualine_x = {
-					{
-						function()
-							return ""
-						end,
-						color = { fg = colors.bg2, bg = colors.bg1 },
-						padding = { left = 0, right = 0 },
-					},
 					{
 						"tabs",
 						show_modified_status = false,
@@ -234,15 +160,6 @@ return {
 							active = { fg = colors.magenta, bg = colors.bg2, gui = "bold" },
 							inactive = { fg = colors.gray, bg = colors.bg2 },
 						},
-					},
-					{
-						function()
-							return ""
-						end,
-						color = function()
-							return { fg = mode_color(), bg = colors.bg2, gui = "bold" }
-						end,
-						padding = { left = 0, right = 0 },
 					},
 					{
 						function()

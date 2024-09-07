@@ -19,25 +19,26 @@ local function setup_vim()
 	vim.opt.completeopt = "menu,menuone,noinsert"
 end
 
+-- TODO the hex codes here should be variables stored somewhere
 local function setup_theme()
 	vim.cmd([[
-    colorscheme gruvbox
+    colorscheme cyberdream
 
     filetype plugin on
 
     hi Normal guibg=NONE
-    hi NormalFloat guibg='#3c3836'
-    hi SignColumn guibg='#3c3836'
-    hi FloatBorder guifg='#3c3836'
+    hi NormalFloat guibg='#1e2124'
+    hi SignColumn guibg='#1e2124'
+    hi FloatBorder guifg='#1e2124'
 
-    hi GitSignsAdd guibg='#3c3836' guifg='#b8bb26'
-    hi GitSignsChange guibg='#3c3836' guifg='#fe8019'
-    hi GitSignsDelete guibg='#3c3836' guifg='#fb4934'
+    hi GitSignsAdd guibg='#1e2124' guifg='#5eff6c'
+    hi GitSignsChange guibg='#1e2124' guifg='#ffbd5e'
+    hi GitSignsDelete guibg='#1e2124' guifg='#ff6e5e'
 
-    hi DiagnosticSignError guibg='#3c3836' guifg='#fb4934'
-    hi DiagnosticSignWarn guibg='#3c3836' guifg='#fabd2f'
-    hi DiagnosticSignHint guibg='#3c3836' guifg='#458588'
-    hi DiagnosticSignInfo guibg='#3c3836' guifg='#83a598'
+    hi DiagnosticSignError guibg='#1e2124' guifg='#ff6e5e'
+    hi DiagnosticSignWarn guibg='#1e2124' guifg='#ffbd5e'
+    hi DiagnosticSignHint guibg='#1e2124' guifg='#ff5ef1'
+    hi DiagnosticSignInfo guibg='#1e2124' guifg='#5ea1ff'
   ]])
 end
 
