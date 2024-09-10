@@ -82,4 +82,13 @@ return {
 			require("cmp").setup(opts)
 		end,
 	},
+
+  {
+      "danymat/neogen",
+      config = true,
+      opts = {
+        enabled = true,
+        snippet_engine = "luasnip",
+      }
+  }
 }

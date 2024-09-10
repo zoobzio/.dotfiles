@@ -21,7 +21,6 @@ return {
 				"php",
 				"json",
 				"yaml",
-				"swift",
 				"css",
 				"scss",
 				"html",

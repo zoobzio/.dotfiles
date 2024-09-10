@@ -37,8 +37,8 @@ local function setup_theme()
 
     hi DiagnosticSignError guibg='#1e2124' guifg='#ff6e5e'
     hi DiagnosticSignWarn guibg='#1e2124' guifg='#ffbd5e'
-    hi DiagnosticSignHint guibg='#1e2124' guifg='#ff5ef1'
-    hi DiagnosticSignInfo guibg='#1e2124' guifg='#5ea1ff'
+    hi DiagnosticSignHint guibg='#1e2124' guifg='#5ef1ff'
+    hi DiagnosticSignInfo guibg='#1e2124' guifg='#ff5ef1' 
   ]])
 end
 
