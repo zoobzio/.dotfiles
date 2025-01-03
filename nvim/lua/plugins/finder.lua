@@ -61,6 +61,7 @@ return {
 			{ "<Leader>ft", ":Telescope live_grep<cr>" },
 			{ "<Leader>fa", ":Telescope aerial<cr>" },
 			{ "<Leader>fd", ":Telescope file_browser<cr>" },
+      { "<Leader>fe", ":Telescope diagnostics<cr>" }
 		},
 	},
 }
