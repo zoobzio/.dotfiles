@@ -13,4 +13,7 @@ for d in */ ; do
   ln -s "${repo_config}" "${local_config}"
 done
 
+rm -rf ~/.config/fish-ai.ini 
+ln -s "${pwd}/fish-ai.ini" ~/.config/fish-ai.ini
+
 echo "#> Finished installing dotfiles..."
