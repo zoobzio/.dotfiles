@@ -35,4 +35,5 @@ require("editor").setup({
 	{ mode = "n", expr = "<Leader>[", cmd = ":tabprevious<CR>" },
 	{ mode = "n", expr = "<Leader>]", cmd = ":tabnext<CR>" },
   { mode = "n", expr = "<Leader>t", cmd = ":ToggleTerm direction=float<CR>" },
+  { mode = "n", expr = "<Leader>x", cmd = ":lua require('spectre').open()<CR>" },
 })

@@ -59,6 +59,15 @@ local function setup_formatter()
 		{ "BufWritePre" },
 		{ pattern = "*.vue,*.ts,*.js,*.mjs,*,cjs,*.json,*.yaml,*.lua,*.go,*.py", command = "Neoformat", group = formatGroup }
 	)
+  vim.api.nvim_create_autocmd(
+    {"BufRead", "BufNewFile"},
+    {
+      pattern = "*.sqlx",
+      callback = function()
+        vim.bo.filetype = "sql"
+      end,
+    }
+  )
 end
 
 local function setup_shortcuts(shortcuts)

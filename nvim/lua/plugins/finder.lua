@@ -11,6 +11,20 @@ return {
 		opts = {},
 	},
 
+  -- Spectre 
+  {
+    "nvim-pack/nvim-spectre",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
+    cmd = "Spectre",
+    opts = {
+      is_open_target_win = true,
+      is_insert_mode = true,
+      line_sep = "-------------------------",
+    },
+  },
+
 	-- Telescope
 	{
 		"nvim-telescope/telescope.nvim",
@@ -63,5 +77,18 @@ return {
 			{ "<Leader>fd", ":Telescope file_browser<cr>" },
       { "<Leader>fe", ":Telescope diagnostics<cr>" }
 		},
+	},
+
+	-- Kevin Voice Integration
+	{
+		dir = vim.fn.stdpath("config") .. "/lua/plugins/kevin-voice.lua",
+		name = "kevin-voice",
+		config = function()
+			require("plugins.kevin-voice").setup({
+				debug = false,
+				auto_open_files = true
+			})
+		end,
+		event = "VimEnter",
 	},
 }
