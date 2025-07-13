@@ -79,12 +79,12 @@ return {
 		},
 	},
 
-	-- Kevin Voice Integration
+	-- Kevin Integration
 	{
-		dir = vim.fn.stdpath("config") .. "/lua/plugins/kevin-voice.lua",
-		name = "kevin-voice",
+		dir = vim.fn.stdpath("config") .. "/lua/plugins/kevin.lua",
+		name = "kevin",
 		config = function()
-			require("plugins.kevin-voice").setup({
+			require("plugins.kevin").setup({
 				debug = false,
 				auto_open_files = true
 			})
