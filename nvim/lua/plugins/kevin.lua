@@ -8,7 +8,9 @@ return {
         local config = {
             socket_path = '/tmp/kevin.sock',
             auto_open_files = true,
-            debug = true  -- Enable debug by default for testing
+            debug = true,  -- Enable debug by default for testing
+            enable_rag = true,
+            auto_start_listener = true
         }
 
         -- State
@@ -43,6 +45,15 @@ return {
             return table.concat(lines, '\n')
         end
 
+        -- Search function using kevin's protocol
+        function M.search_code(query)
+            send_message("search", query, {})
+            log("Searching for: " .. query)
+        end
+
+        -- Voice control is now automatic with focus/blur events
+        -- No need for explicit start/stop functions
+
         -- Socket communication
         local function check_kevin_service()
             local uv = vim.loop
@@ -72,8 +83,10 @@ return {
                 else
                     log("Connected to Kevin")
                     connected = true
-                    M.register_instance()
-                    M.send_context()
+                    vim.schedule(function()
+                        M.register_instance()
+                        -- Voice starts automatically with focus event
+                    end)
                 end
             end)
             
@@ -85,7 +98,9 @@ return {
                 end
                 
                 if data then
-                    M.handle_kevin_message(data)
+                    vim.schedule(function()
+                        M.handle_kevin_message(data)
+                    end)
                 end
             end)
         end
@@ -107,6 +122,8 @@ return {
             socket:write(json_msg, function(err)
                 if err then
                     log("Failed to send message: " .. err)
+                else
+                    log("Sent message: " .. msg_type .. " - " .. content)
                 end
             end)
         end
@@ -116,7 +133,8 @@ return {
             local pid = vim.fn.getpid()
             local cwd = vim.fn.getcwd()
             
-            send_message("focus_gained", "", {
+            -- Send initial focus event
+            send_message("focus", "", {
                 pid = pid,
                 working_dir = cwd
             })
@@ -124,14 +142,21 @@ return {
             log("Registered instance - PID: " .. pid .. ", CWD: " .. cwd)
         end
 
-        function M.send_context()
-            if not connected then return end
-            
+        function M.update_context()
             local buf = vim.api.nvim_get_current_buf()
             local file_path = vim.api.nvim_buf_get_name(buf)
             local cursor = vim.api.nvim_win_get_cursor(0)
             local doc_path = get_doc_path(file_path)
             
+            -- Get language/filetype
+            local filetype = vim.bo.filetype
+            
+            -- Get current function context (simple version - line based)
+            local current_line = cursor[1]
+            local lines = vim.api.nvim_buf_get_lines(buf, math.max(0, current_line - 10), current_line + 10, false)
+            local context_snippet = table.concat(lines, '\n')
+            
+            -- Only get git info when explicitly needed (lazy)
             current_context = {
                 file_path = file_path,
                 file_content = get_buffer_content(),
@@ -140,18 +165,21 @@ return {
                 cursor_line = cursor[1],
                 cursor_col = cursor[2],
                 working_dir = vim.fn.getcwd(),
-                pid = vim.fn.getpid()
+                pid = vim.fn.getpid(),
+                git_branch = nil,  -- Lazy load when needed
+                git_status = nil,  -- Lazy load when needed
+                filetype = filetype,
+                context_snippet = context_snippet
             }
-            
-            send_message("context_update", current_context.file_content, {
-                pid = current_context.pid,
-                working_dir = current_context.working_dir,
-                file_path = file_path,
-                docs_path = doc_path,
-                docs_content = current_context.docs_content,
-                cursor_line = current_context.cursor_line,
-                cursor_col = current_context.cursor_col
-            })
+        end
+        
+        function M.get_git_info()
+            -- Only call this when actually needed
+            if not current_context.git_branch then
+                current_context.git_branch = vim.fn.system("git branch --show-current 2>/dev/null"):gsub('\n', '')
+                current_context.git_status = vim.fn.system("git status --porcelain 2>/dev/null"):gsub('\n', '\\n')
+            end
+            return current_context.git_branch, current_context.git_status
         end
 
         function M.handle_kevin_message(data)
@@ -163,8 +191,69 @@ return {
                     return
                 end
                 
-                if message.type == "open_file" and message.metadata.file_path then
-                    M.open_file(message.metadata.file_path)
+                if message.type == "open_file" then
+                    if message.metadata and message.metadata.file_path then
+                        M.open_file(message.metadata.file_path)
+                    end
+                    
+                elseif message.type == "search_result" then
+                    -- Kevin found code
+                    if message.metadata then
+                        print("Found: " .. (message.metadata.file_path or "Unknown") .. ":" .. (message.metadata.cursor_line or "?"))
+                        -- Could auto-open the file if desired
+                    end
+                    
+                elseif message.type == "notification" then
+                    -- Kevin notification
+                    print("[Kevin] " .. message.content)
+                    
+                elseif message.type == "voice_status" then
+                    -- Voice status update
+                    log("Voice status: " .. message.content)
+                    
+                elseif message.type == "error" then
+                    -- Error from kevin
+                    print("[Kevin Error] " .. message.content)
+                    
+                elseif message.type == "goto_line" then
+                    -- Navigate to specific line
+                    vim.api.nvim_win_set_cursor(0, {message.metadata.line, 0})
+                    
+                elseif message.type == "search_text" then
+                    -- Search for text in current buffer
+                    vim.cmd("/" .. vim.fn.escape(message.content, '/\\'))
+                    
+                elseif message.type == "insert_text" then
+                    -- Insert text at current cursor position
+                    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+                    vim.api.nvim_buf_set_text(0, row-1, col, row-1, col, {message.content})
+                    
+                elseif message.type == "request_context" then
+                    -- Kevin is asking for current context
+                    M.update_context()
+                    send_message("context_response", current_context.context_snippet, {
+                        file_path = current_context.file_path,
+                        cursor_line = current_context.cursor_line,
+                        cursor_col = current_context.cursor_col,
+                        filetype = current_context.filetype
+                    })
+                    
+                elseif message.type == "request_file" then
+                    -- Kevin is asking for full file
+                    M.update_context()
+                    send_message("file_response", current_context.file_content, {
+                        file_path = current_context.file_path,
+                        filetype = current_context.filetype
+                    })
+                    
+                elseif message.type == "request_git_info" then
+                    -- Kevin needs git info
+                    local git_branch, git_status = M.get_git_info()
+                    send_message("git_info_response", "", {
+                        git_branch = git_branch,
+                        git_status = git_status,
+                        working_dir = current_context.working_dir
+                    })
                 end
             end
         end
@@ -186,16 +275,15 @@ return {
         end
 
         function M.send_focus_gained()
-            send_message("focus_gained", "", {
+            send_message("focus", "", {
                 pid = vim.fn.getpid(),
                 working_dir = vim.fn.getcwd()
             })
         end
 
         function M.send_focus_lost()
-            send_message("focus_lost", "", {
-                pid = vim.fn.getpid(),
-                working_dir = vim.fn.getcwd()
+            send_message("blur", "", {
+                pid = vim.fn.getpid()
             })
         end
 
@@ -254,29 +342,12 @@ return {
             -- Connect to Kevin
             connect_kevin()
             
+            -- RAG is now handled through kevin's socket interface
+            
             -- Set up autocmds
             local group = vim.api.nvim_create_augroup("KevinVoice", { clear = true })
             
-            -- Send context on buffer changes
-            vim.api.nvim_create_autocmd({"BufEnter", "BufWritePost"}, {
-                group = group,
-                callback = function()
-                    M.send_context()
-                end
-            })
-            
-            -- Send context on cursor movement (debounced)
-            local timer = vim.loop.new_timer()
-            vim.api.nvim_create_autocmd("CursorMoved", {
-                group = group,
-                callback = function()
-                    timer:start(500, 0, vim.schedule_wrap(function()
-                        M.send_context()
-                    end))
-                end
-            })
-            
-            -- Handle focus events
+            -- Only track focus for kevin to know which nvim instance is active
             vim.api.nvim_create_autocmd("FocusGained", {
                 group = group,
                 callback = M.send_focus_gained
@@ -287,6 +358,16 @@ return {
                 callback = M.send_focus_lost
             })
             
+            -- Clean up on exit
+            vim.api.nvim_create_autocmd("VimLeavePre", {
+                group = group,
+                callback = function()
+                    if socket then
+                        socket:close()
+                    end
+                end
+            })
+            
             -- Create user commands
             vim.api.nvim_create_user_command("KevinDocs", M.create_docs, {
                 desc = "Create/open documentation file for current buffer"
@@ -295,6 +376,48 @@ return {
             vim.api.nvim_create_user_command("KevinStatus", M.show_status, {
                 desc = "Show Kevin plugin status"
             })
+            
+            vim.api.nvim_create_user_command("KevinSearch", function(opts)
+                M.search_code(opts.args)
+                -- Results will come back as search_result messages
+            end, {
+                nargs = 1,
+                desc = "Search codebase using Kevin's RAG"
+            })
+            
+            vim.api.nvim_create_user_command("KevinChat", function(opts)
+                send_message("chat", opts.args, {})
+                print("Sent to Kevin: " .. opts.args)
+            end, {
+                nargs = 1,
+                desc = "Chat with Kevin"
+            })
+            
+            vim.api.nvim_create_user_command("KevinExplain", function()
+                M.update_context()
+                send_message("explain", "What does this code do?", {
+                    file_path = current_context.file_path,
+                    cursor_line = current_context.cursor_line
+                })
+            end, {
+                desc = "Ask Kevin to explain current code"
+            })
+            
+            vim.api.nvim_create_user_command("KevinShow", function()
+                -- Update context first
+                M.update_context()
+                -- Send context update
+                send_message("context", "", {
+                    pid = vim.fn.getpid(),
+                    file_path = current_context.file_path,
+                    cursor_line = current_context.cursor_line,
+                    cursor_col = current_context.cursor_col
+                })
+                print("Shared current context with Kevin")
+            end, {
+                desc = "Share current context with Kevin"
+            })
+            
             
             log("Kevin Voice plugin initialized")
         end

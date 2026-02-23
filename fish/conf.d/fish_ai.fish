@@ -11,7 +11,7 @@ set -g supported_versions 3.9 3.10 3.11 3.12 3.13
 ## using the command `fish_key_reader`.
 ##
 bind \cP _fish_ai_codify_or_explain
-bind -k nul _fish_ai_autocomplete_or_fix
+## bind -k nul _fish_ai_autocomplete_or_fix
 
 ##
 ## This section contains the plugin lifecycle hooks invoked by the fisher package
