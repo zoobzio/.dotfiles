@@ -78,17 +78,4 @@ return {
       { "<Leader>fe", ":Telescope diagnostics<cr>" }
 		},
 	},
-
-	-- Kevin Integration
-	{
-		dir = vim.fn.stdpath("config") .. "/lua/plugins/kevin.lua",
-		name = "kevin",
-		config = function()
-			require("plugins.kevin").setup({
-				debug = false,
-				auto_open_files = true
-			})
-		end,
-		event = "VimEnter",
-	},
 }

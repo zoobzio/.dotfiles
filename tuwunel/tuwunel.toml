@@ -1,0 +1,18 @@
+[global]
+
+# Server identity — cannot be changed after initial database creation
+server_name = "localhost"
+
+# Database
+database_path = "/home/zoobzio/.local/share/tuwunel/"
+
+# Network — localhost only, no external exposure
+address = ["127.0.0.1"]
+port = 8008
+
+# Registration — token-gated for agent provisioning
+allow_registration = true
+registration_token = "jack"
+
+# Federation — disabled, purely local
+allow_federation = false

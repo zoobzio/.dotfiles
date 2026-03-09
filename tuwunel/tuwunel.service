@@ -1,0 +1,13 @@
+[Unit]
+Description=Tuwunel Matrix Server
+After=network.target
+
+[Service]
+Type=simple
+Environment=TUWUNEL_CONFIG=%h/.config/tuwunel/tuwunel.toml
+ExecStart=%h/.local/bin/tuwunel
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
