@@ -1,0 +1,36 @@
+profiles:
+  rockhopper:
+    git:
+      name: ROCKHOPPER
+      email: rockhopper@zoobz.io
+    github:
+      user: rockhopper-zbz
+    ssh:
+      key: ~/.ssh/rockhopper_ed25519
+
+  nebuchadnezzar:
+    git:
+      name: NEBUCHADNEZZAR
+      email: nebuchadnezzar@zoobz.io
+    github:
+      user: nebuchadnezzar-zbz
+    ssh:
+      key: ~/.ssh/nebuchadnezzar_ed25519
+
+  wintermute:
+    git:
+      name: WINTERMUTE
+      email: wintermute@zoobz.io
+    github:
+      user: wintermute-zbz
+    ssh:
+      key: ~/.ssh/wintermute_ed25519
+
+  enterprise:
+    git:
+      name: ENTERPRISE
+      email: enterprise@zoobz.io
+    github:
+      user: enterprise-zbz
+    ssh:
+      key: ~/.ssh/enterprise_ed25519

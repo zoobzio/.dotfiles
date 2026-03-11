@@ -1,0 +1,15 @@
+# spotify_player configuration
+# Docs: https://github.com/aome510/spotify-player/blob/master/docs/config.md
+#
+# First run: `spotify_player authenticate`
+# Daemon mode: `spotify_player -d`
+# CLI commands: `spotify_player playback`, `spotify_player get`, etc.
+
+[client]
+# Register an app at https://developer.spotify.com/dashboard
+# Redirect URI: http://localhost:8080/callback
+client_id = "b46ebe555afa4be3af3f2247e44f6ac7"
+
+[device]
+name = "spotify_player"
+volume = 70

@@ -29,7 +29,9 @@ sudo pacman -S --needed --noconfirm \
     ripgrep \
     xclip \
     gcc \
-    zstd
+    zstd \
+    age \
+    spotify-player
 
 # ──────────────────────────────────────────────
 # AUR packages
