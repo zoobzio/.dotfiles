@@ -64,3 +64,9 @@ Give things identity. Emit signals. Enable correlation without requiring externa
 ## Context
 
 Every I/O operation accepts `context.Context`. Timeouts, cancellation, and scoping are universal.
+
+## The Makefile
+
+The Makefile is the source of truth for project commands. Linting, testing, building, coverage, security scanning — whatever the project needs, the Makefile defines how to run it.
+
+Agents do not invoke tools directly. They run `make` targets. This abstracts the tooling, keeps agents repo-variant agnostic, and means the project controls its own commands. If the Makefile doesn't have a target for something, that's a signal — either the project doesn't need it, or the Makefile needs updating. Either way, the Makefile decides.

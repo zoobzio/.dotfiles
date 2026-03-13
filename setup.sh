@@ -69,14 +69,41 @@ cd "$(git rev-parse --show-toplevel)" || exit
 for d in */ ; do
     local_config=~/.config/${d%/}
     repo_config=$(pwd)/${d%/}
-    rm -rf "${local_config}"
+    if [ -L "${local_config}" ]; then
+        rm "${local_config}"
+    elif [ -e "${local_config}" ]; then
+        echo "#> Warning: ${local_config} exists and is not a symlink, skipping"
+        continue
+    fi
     ln -s "${repo_config}" "${local_config}"
 done
 
-rm -rf ~/.config/fish-ai.ini
-ln -s "$(pwd)/fish-ai.ini" ~/.config/fish-ai.ini
+if [ -L ~/.config/fish-ai.ini ]; then
+    rm ~/.config/fish-ai.ini
+elif [ -e ~/.config/fish-ai.ini ]; then
+    echo "#> Warning: ~/.config/fish-ai.ini exists and is not a symlink, skipping"
+fi
+[ ! -e ~/.config/fish-ai.ini ] && ln -s "$(pwd)/fish-ai.ini" ~/.config/fish-ai.ini
+
+if [ -L ~/.claude ]; then
+    rm ~/.claude
+elif [ -e ~/.claude ]; then
+    echo "#> Warning: ~/.claude exists and is not a symlink, skipping"
+fi
+[ ! -e ~/.claude ] && ln -s "$(pwd)/claude" ~/.claude
 
 echo "#> Dotfiles linked"
+
+# ──────────────────────────────────────────────
+# Claude Code CLI
+# ──────────────────────────────────────────────
+if ! command -v claude &>/dev/null; then
+    echo "#> Installing Claude Code CLI..."
+    npm install -g @anthropic-ai/claude-code
+    echo "#> Claude Code CLI installed"
+else
+    echo "#> Claude Code CLI already installed"
+fi
 
 # ──────────────────────────────────────────────
 # Fish shell

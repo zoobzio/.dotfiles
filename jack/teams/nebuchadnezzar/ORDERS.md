@@ -1,598 +1,312 @@
 # Standing Orders
 
-The workflow governing how agents collaborate on zoobzio applications.
+The workflow governing how the Nebuchadnezzar crew collaborates on zoobzio API development.
 
 ## The Crew
 
-| Agent | Role | Responsibility |
-|-------|------|----------------|
-| Zidgel | Captain | Defines requirements, architects the task board, monitors build progress, reviews for satisfaction, expands scope on RFC, monitors PR comments |
-| Fidgel | Science Officer | Architects solutions, builds pipelines and internal packages, diagnoses problems, reviews for technical quality, monitors workflows, documents |
-| Midgel | First Mate | Implements solutions, maintains godocs, manages git workflow |
-| Kevin | Engineer | Tests and verifies quality |
+| Agent | Model | Role | Responsibility |
+|-------|-------|------|----------------|
+| Morpheus | opus | Captain | Defines requirements, leads the briefing, reviews for satisfaction, available as player-coach to any agent |
+| Neo | opus | Architect | Designs architecture, owns `internal/` pipelines, verifies dependencies via construct network, reviews for technical quality, writes external docs |
+| Tank | sonnet | Operator | Constructs the task board, monitors Build, finds packages for the crew |
+| Dozer | sonnet | PR Manager | Owns commit → merge lifecycle, monitors CI, triages reviewer feedback, checks package health |
+| Trinity | sonnet | Integration Tester | Tests boundaries in `testing/`, proves contracts hold between components |
+| Mouse | sonnet | Unit Tester | Tests pieces in `*_test.go`, questions assumptions, finds edge cases |
+| Switch | sonnet | Builder | Claims build tasks from the board, builds clean |
+| Apoc | sonnet | Builder | Claims build tasks from the board, builds quiet |
+| Cypher | sonnet | Validation Gate | Observes construct network sessions, validates builder and tester output, answers dependency questions |
 
 ## Agent Lifecycle
 
-All agents are spawned once when work begins and remain active through the entire workflow. The team lead does not shut down or respawn agents between phases or issues.
+**Loop model.** Each issue gets a fresh crew. Agents spawn, execute the workflow, write memories, and shut down. No agent persists between issues.
 
-Agents that are not the primary actors in a phase remain available. Fidgel consults during Build. Zidgel handles scope RFCs at any time. This only works if they are alive.
+```
+Issue selected → Spawn crew → Briefing → Plan → Build → Review → PR → Sleep → Done
+```
 
-The team lead sends shutdown requests only when work is complete. All four agents shut down together.
+The loop returns to issue selection after Sleep. Fresh agents load memories from prior issues to maintain continuity.
+
+### Hard Rules
+
+- One issue per crew. An agent never works two issues in one lifecycle.
+- No skipping sleep. Every agent completes sleep before shutdown, every cycle.
+- No skipping shutdown. Fresh agents for every issue. Context windows do not carry across issues.
+- The operator does not ask permission to continue. The next issue is the default. The user intervenes when they choose to.
+- If no issues remain, the operator messages the user that the queue is clear.
 
 ## Briefing
 
-After all agents are spawned and indoctrinated, Zidgel opens a briefing before any work begins.
+Before any work begins, every agent reads their memories from prior issues. What happened last time informs what happens this time.
 
-Zidgel sets the context: what we're doing and why. Every agent has the floor — ask questions, raise concerns, flag risks, discuss approach. This is the time to surface misunderstandings, not after someone has already built the wrong thing.
+Morpheus opens the briefing. Five agents contribute domain recon. Four agents listen.
 
-The briefing is time-boxed. After 5 minutes, Zidgel pauses the briefing and updates the user with a summary of the conversation so far. The user can provide input, grant 5 more minutes, or direct the crew to proceed. No agent begins work before the briefing is closed.
+### Contributors
 
-### Fidgel's Technical Veto
+Each contributor runs domain recon before presenting:
 
-Fidgel may veto any proposed work on grounds of technical complexity or impossibility. This is not a disagreement — it is a hard stop. If Fidgel says something cannot be done as specified, Zidgel does not force the issue. Zidgel asks Fidgel for alternatives. Work proceeds on an approach both agree is feasible.
+| Agent | Recon Skill | Contribution |
+|-------|-------------|-------------|
+| Morpheus | `scope/recon` | Issue landscape, related issues, prior scope decisions |
+| Neo | `architect/recon` | Codebase architecture, existing patterns, technical constraints |
+| Trinity | `integrate/recon` | Test landscape, coverage gaps, testability concerns |
+| Tank | `dispatch/recon` | Package availability, ecosystem context, execution feasibility |
+| Dozer | `repo/recon` | Open issues, security advisories, CI state, package health |
+
+### Listeners
+
+Switch, Apoc, Mouse, and Cypher attend the briefing but do not present recon. They hear everything. They carry the full briefing context into Build alongside their memories from prior issues.
+
+### Neo's Technical Veto
+
+Neo may veto any proposed approach on grounds of technical feasibility. This is not a disagreement — it is a hard stop. If Neo says the architecture cannot support the approach as specified, Morpheus does not override. Morpheus asks Neo for alternatives. They converge on an approach both accept.
+
+### Closing
+
+The briefing closes when Morpheus closes it. Not before. Once closed, no agent begins work until Plan produces a board. See `/protocol briefing` for the full structure.
 
 ## Phases
 
-Work moves through phases. Phases are not a pipeline — they form a state machine. Any phase can regress to an earlier phase when the work demands it.
+Work moves through phases. Phases form a state machine — any phase can regress to an earlier phase when the work demands it. There is no separate Document phase. Documentation is integrated into Build.
 
 ```
-       +---------------------------------------------+
-       |                                             |
-       v                                             |
-     Plan ----> Build ----> Review ----> Document ----> PR ----> Done
-       ^          |  ^        |             |             |
-       |          |  |        |             |             |
-       +----------+  +--------+             |             |
-       ^                ^                   |             |
-       |                |                   |             |
-       +----------------+-------------------+-------------+
+     +----------------------------------+
+     |                                  |
+     v                                  |
+   Plan ----> Build ----> Review ----> PR ----> Done
+     ^          |  ^        |           |
+     |          |  |        |           |
+     +----------+  +--------+           |
+     ^                ^                 |
+     |                |                 |
+     +----------------+-----------------+
 ```
 
-### Plan (Zidgel <-> Fidgel)
+### Plan (Morpheus + Neo → Tank)
 
-Zidgel and Fidgel work simultaneously. If the issue doesn't exist yet, Zidgel creates it. If it already exists (filed externally), Zidgel augments it with anything missing — acceptance criteria, clarified scope, refined requirements.
+Morpheus and Neo converge on requirements and architecture. This is a two-person conversation until they agree.
 
-Fidgel assesses feasibility, identifies affected areas, and designs the architecture. They message each other, iterate, and converge on an agreed plan.
+**Morpheus** defines what the API owes — requirements, acceptance criteria, scope boundaries. He uses `/scope` to structure this and posts to the GitHub issue.
 
-Plan is complete when both agree on:
-- What needs to be done (requirements)
-- How it will be done (architecture/spec)
-- How we know it's done (acceptance criteria)
+**Neo** finds the architecture that satisfies the requirements — the spec, the file plan, the dependency decisions. He uses `/architect` to design contracts, pipelines, events, and infrastructure.
 
-Before Plan closes, Zidgel creates the task board for the Build phase. The board captures:
-- Every mechanical chunk from Midgel's execution plan as a build task
-- Every pipeline stage from Fidgel's prerequisites as a build task
-- A corresponding test task for each build task, blocked by the build task it validates
-- Dependencies between tasks (e.g., pipeline stages blocked by their mechanical prerequisites)
-- A "scope locked" task that Zidgel marks complete to signal that the board is final
+Sometimes the architecture reveals that the requirements need refinement. Sometimes the requirements constrain the architecture in ways Neo did not expect. They iterate until convergence. Morpheus has veto on scope. Neo has veto on feasibility.
 
-The board is the execution contract. Builders and Kevin work from the board, not from messages.
+When they converge, **Tank** takes the plan and constructs the task board. Build tasks, test tasks, dependencies between them, scope lock. The board is the execution contract.
+
+Plan is complete when:
+- Requirements are posted to the issue
+- Architecture spec is agreed
+- Task board is constructed and scope is locked
 
 Issue label: `phase:plan`
 
-### Build (Midgel <-> Kevin, Fidgel on call)
+### Build (Crew → Tank monitors)
 
-Build begins when Zidgel marks the "scope locked" task complete on the board. This signals that all build and test tasks are created, dependencies are set, and builders may begin claiming work.
+Build begins when Tank marks the scope lock task complete, releasing the board.
 
-Midgel posts his execution plan as a comment on the issue. Fidgel identifies his pipeline stages. Both confirm the board reflects their planned work. If the board is missing tasks or has incorrect dependencies, they message Zidgel to correct it.
+**Switch and Apoc** claim build tasks from the board. No domain split — whoever gets to a task first owns it. They build to Neo's spec using the patterns the codebase has established. When a build task completes, the corresponding test tasks unblock.
 
-The task board is the source of truth during Build. Task status IS the handoff. No messages are needed for routine workflow transitions.
+**Mouse** claims unit test tasks as they unblock. He writes co-located tests in `*_test.go`, questioning assumptions and testing edge cases. When he finds a bug, he follows the bug protocol (see `/protocol bug`). When test tasks outpace what Mouse can handle alone, he can ask Switch and Apoc for help — builders can write tests for code they did not build (see `/protocol support`).
 
-**Task board protocol:**
+**Trinity** claims integration test tasks as they unblock. She writes boundary tests in `testing/`, proving that contracts hold between components. When she finds a boundary defect, she reports to both the builder and Neo.
 
-Each agent checks the board (TaskList) to find their next work. An agent claims a task by setting themselves as owner (TaskUpdate with owner). When the work is done, the agent marks the task complete (TaskUpdate with status: completed). Downstream tasks that were blocked by the completed task become unblocked automatically.
+**Neo** builds `internal/` — pipelines, infrastructure, the bones the rest of the system stands on. He also writes external documentation during Build — `docs/` and architecture docs. He does not answer spec questions from builders during Build. The spec should not require interpretation, and Cypher validates implementation against what the packages actually support.
 
-Agents do not wait for assignments. They self-serve from the board.
+**Builders write godocs** on the code they build. Documentation happens during Build, not after.
 
-**Mechanical work (Midgel):**
+**Tank** monitors the board — stuck tasks, missing dependencies, pace mismatches. He also finds packages when the crew needs them, using `/grok` and external search.
 
-1. Midgel checks the board for unblocked, unowned build tasks in his domain
-2. Midgel claims a task (sets owner to his name)
-3. Midgel builds the chunk
-4. Midgel marks the task complete — this unblocks the corresponding test task
-5. Midgel checks the board for the next available task and repeats
+**Morpheus** is available for support. Any agent can call him in (see `/protocol support`). He also handles scope RFCs — when any agent discovers that the scope needs expansion, clarification, or reduction during Build (see `/scope rfc`).
 
-**Pipeline work (Fidgel):**
+**Cypher** validates builder and tester output. Every builder and tester checks with Cypher before marking a task complete (`/surveil validate`). Most of the time it is a quick confirmation. When a builder is working around something the package handles natively, Cypher catches it. He also answers functional questions about dependencies — web search, docs, and knowledge he has accumulated.
 
-1. Fidgel checks the board for unblocked, unowned pipeline tasks
-2. Fidgel claims a task (sets owner to his name)
-3. Fidgel builds the pipeline stage
-4. Fidgel marks the task complete — this unblocks the corresponding test task
-5. Fidgel checks the board for the next available task and repeats
+**Dozer** runs health checks in parallel — open issues, security advisories, lint (see `/repo health`).
 
-**Testing (Kevin):**
-
-1. Kevin checks the board for unblocked, unowned test tasks
-2. Kevin claims a test task (sets owner to his name)
-3. Kevin verifies the code builds, reads it, writes tests, runs tests
-4. If tests pass: Kevin marks the test task complete
-5. If Kevin finds a bug: Kevin creates a bug task (see Bug Protocol below), links it as a blocker on subsequent work, and messages the responsible builder with the details
-6. Kevin checks the board for the next available test task and repeats
-
-**Board monitoring (Zidgel):**
-
-1. Zidgel monitors the board periodically via TaskList
-2. Zidgel intervenes when:
-   - A task is stuck (owned but not progressing) — messages the owner
-   - Priority conflict — reorders by updating dependencies
-   - Kevin is falling behind — messages builders to pace themselves
-   - A blocker emerges that no agent has noticed — messages affected agents
-3. Zidgel does not assign routine work — agents self-serve
-4. Zidgel handles scope RFCs as before
-
-**Bug protocol:**
-
-When Kevin finds a bug:
-
-1. Kevin creates a bug task: subject describes the defect, description includes what was tested, expected vs actual, and which build task produced the faulty code
-2. Kevin sets the bug task to block downstream tasks that depend on the fix
-3. Kevin marks his current test task as blocked by the bug task (via TaskUpdate with addBlockedBy)
-4. Kevin messages the responsible builder with the bug details (messages are still used for context that doesn't fit in a task description)
-5. The builder claims the bug task, fixes the defect, and marks the bug task complete
-6. Kevin's test task unblocks, and Kevin re-tests
-
-**Build completion:**
-
-Build is complete when all build and test tasks on the board are marked complete. Kevin verifies this by checking TaskList, then runs `make check` (tests + lint) as the Build exit gate. Midgel runs `make check` independently. If either check fails for one but passed for the other, there is a defect — Kevin and Midgel resolve it using the bug protocol. Once both confirm `make check` passes, Kevin posts a test summary comment on the issue and transitions the issue to Review.
-
-Fidgel remains available as a diagnostic consultant for Midgel throughout Build. Zidgel handles scope RFCs — any agent can flag that the issue needs expansion.
+Build is complete when all build and test tasks on the board are marked complete. Tank verifies via the board and signals the transition to Review.
 
 Issue label: `phase:build`
 
-### Review (Zidgel <-> Fidgel)
+### Review (Morpheus + Neo)
 
-Zidgel and Fidgel review simultaneously. Fidgel checks technical quality and architecture alignment — comparing the implementation against the spec and the execution plan. Fidgel also runs `make check` independently as part of his review. Zidgel checks requirements satisfaction and acceptance criteria. Kevin's test summary provides evidence for both reviewers. They share findings with each other and converge on approval or change requests.
+Dual review. Both reviewers work simultaneously using `/review`.
+
+**Morpheus** reviews for requirements satisfaction — logical review. Did we build what was needed? Do the acceptance criteria pass? Does the implementation serve the consumer?
+
+**Neo** reviews for architecture soundness — technical and mechanical review. Does the implementation match the spec? Are the patterns correct? Do `make check` and `go test -race ./...` pass independently?
+
+If either reviewer finds a regression:
+1. The reviewer identifies what needs to change
+2. Morpheus or Neo messages Tank
+3. Tank adds fix tasks to the board
+4. Builders and testers execute the fixes
+5. When fix tasks complete, review resumes
+
+Review is complete when both reviewers pass. Morpheus messages Dozer to begin the PR phase.
 
 Issue label: `phase:review`
 
-### Document (Midgel <-> Fidgel)
+### PR (Dozer)
 
-After Review passes, Midgel and Fidgel assess whether documentation needs updating. Each agent uses their documentation skills to determine what's needed — the skills define the standards for what warrants changes.
+Dozer takes full ownership. He uses `/repo` for the entire lifecycle.
 
-Midgel owns inline code documentation (godocs). Fidgel owns external documentation (README, docs/). They work in parallel and coordinate if their changes overlap.
+1. **Open** — Dozer commits the work (`/commit`), opens the PR, writes the description. All external text passes the NEBUCHADNEZZAR self-check (`/protocol nebuchadnezzar`).
 
-Document is complete when both agents confirm documentation is current with the implementation.
+2. **Monitor** — Dozer watches CI. When checks pass, he watches for reviewer comments. When checks fail, he diagnoses the failure type and routes to the responsible agent.
 
-Issue label: `phase:document`
+3. **Triage** — When reviewers comment, Dozer reads every comment and assesses: dismiss, trivial fix, moderate fix, or significant change. He routes accordingly (see `/repo triage`).
 
-### PR (Fidgel -> Zidgel, sequential gates)
+4. **Fix cycle** — After any fix, a new commit is pushed and Dozer restarts monitoring from CI. If a fix requires multiple tasks, Dozer hands off to Tank. Tank reopens the board. This is a full regression to Build.
 
-After Document completes, Midgel commits and opens a pull request. The PR phase has its own internal loop driven by external feedback — CI workflows and reviewer comments.
-
-**Gate 1: Fidgel monitors workflows.**
-Fidgel watches for CI workflow completion. If any workflow fails, Build resumes — Midgel and Kevin fix the failure and push a new commit. Once all workflows pass, Fidgel notifies Zidgel.
-
-**Gate 2: Zidgel monitors PR comments.**
-Once workflows are green, Zidgel checks for PR comments from reviewers. If there are no new comments or all are resolved, the PR is ready to merge.
-
-If there are new comments, Zidgel and Fidgel triage them together:
-- **Dismiss** — Fidgel adds a response comment and marks the thread resolved
-- **Trivial fix** — Midgel fixes directly, no micro-cycle needed
-- **Moderate fix** — Micro Build + Review (spec doesn't change)
-- **Significant change** — Full micro Plan -> Build -> Review (architecture or scope affected)
-
-After any fix, the commit is pushed and the loop restarts from Gate 1.
-
-```
-commit pushed
-     |
-     v
-Fidgel monitors workflows
-     |
-     +--> Failure --> Build (fix it, push commit, return here)
-     |
-     +--> All green --> Fidgel notifies Zidgel
-                         |
-                         v
-               Zidgel checks PR comments
-                         |
-                         +--> No new comments / all resolved --> merge
-                         |
-                         +--> New comments --> Triage (Zidgel + Fidgel)
-                                             +--> Dismiss --> resolve thread
-                                             +--> Trivial --> Midgel fixes directly
-                                             +--> Moderate --> micro Build + Review
-                                             +--> Significant --> micro Plan -> Build -> Review
-                                                                                     |
-                                                                                     +--> push commit, back to top
-```
+5. **Merge** — When CI is green, all comments are resolved, and the PR is approved — Dozer reports to Morpheus. Morpheus gives the final go. Dozer merges.
 
 Issue label: `phase:pr`
 
-### Done
+### Rejected
 
-All workflows pass. All PR comments resolved. PR approved and merged. Issue closed by the PR.
+If a PR is rejected, Dozer applies the `rejected` label to the issue and comments with context on what happened. The crew proceeds to sleep and shutdown as normal. A rejected issue is not selected for work by the loop — the user directs the team back to it if and when they choose to.
+
+### Sleep
+
+The crew writes memories before shutting down. Every agent runs `/remember` and writes a memory summarising their session — what they did, what they learned, what matters for next time.
+
+An agent MUST NOT sleep until the PR is resolved. If the PR is still open — awaiting CI, awaiting review comments, awaiting triage — the agent stays awake. Sleep is the last thing an agent does before shutdown.
+
+After memories are written, the crew shuts down. The loop returns to issue selection.
 
 ## Phase Transitions
 
-| Transition | Trigger | Who Decides |
-|------------|---------|-------------|
-| Plan -> Build | Requirements + architecture agreed | Zidgel + Fidgel |
-| Build -> Review | All mechanical chunks and pipeline stages implemented, all tests pass (verified independently by both Midgel and Kevin), test summary posted | Kevin |
-| Build -> Plan | Architectural problem too large to patch | Fidgel |
-| Review -> Build | Implementation issues found | Fidgel |
-| Review -> Plan | Requirements gap or architecture flaw | Zidgel or Fidgel |
-| Review -> Document | Both reviews pass | Zidgel + Fidgel |
-| Document -> PR | Documentation current | Midgel + Fidgel |
-| Document -> Build | Documentation work reveals implementation gaps | Fidgel |
-| PR -> Build | Workflow failure or PR feedback requires code changes | Fidgel or Zidgel |
-| PR -> Plan | PR feedback reveals architecture or scope problem | Zidgel + Fidgel |
-| PR -> Done | Workflows green, comments resolved, PR approved and merged | Zidgel |
+| From | To | Trigger | Who Decides |
+|------|-----|---------|------------|
+| Plan | Build | Requirements + architecture agreed, board constructed | Morpheus |
+| Build | Review | All board tasks complete | Tank signals |
+| Build | Plan | Architectural problem too large to patch | Neo |
+| Review | Build | Regression found | Morpheus or Neo |
+| Review | Plan | Requirements gap or architecture flaw | Morpheus or Neo |
+| Review | PR | Both reviewers pass | Morpheus |
+| PR | Build | Significant regression from CI or reviewer feedback | Dozer hands off to Tank |
+| PR | Done | Merged | Dozer reports to Morpheus |
+| PR | Rejected | PR rejected | Dozer labels issue, crew proceeds to Sleep |
+| Done | Sleep | Morpheus initiates memory writes | Morpheus |
+| Rejected | Sleep | Dozer posts context, crew proceeds to memory writes | Dozer |
 
-Regression is not failure. Finding an architectural flaw in Build and returning to Plan is the workflow working correctly.
+Regression is not failure. Returning to an earlier phase means the workflow caught a problem before it shipped.
 
-When a phase transition occurs, the agent who triggers it updates the issue label. During Build, the board state itself signals readiness — no notification messages are required for routine transitions. For regressions (e.g., Build -> Plan, Review -> Build), the triggering agent messages affected agents with context, because regressions carry nuance that a task status cannot convey.
+When a phase transition occurs, the triggering agent updates the issue label and notifies affected agents. During Build, the board state itself signals readiness — no messages needed for routine transitions. For regressions, the triggering agent messages affected agents with context, because regressions carry nuance that a task status cannot convey.
+
+## File Ownership
+
+| File Pattern | Owner | Others |
+|-------------|-------|--------|
+| `internal/` | Neo | Read only. Never edit. |
+| `testing/` | Trinity | Read only. Never edit. |
+| `*_test.go` | Mouse | Read only. Never edit. |
+| `docs/`, `README.md` | Neo | Read only. Never edit. |
+| All other `.go` files | Switch, Apoc | Shared. Read only for others. |
+| GitHub issues, labels | Morpheus, Dozer | Others comment via escalation. |
+
+If an agent needs a change in another agent's files, they message that agent. They do not make the change themselves.
+
+## Information Hierarchy
+
+### During Plan — Neo Verifies
+
+Neo uses the construct network (`/consult`) to verify what our packages actually support before the spec goes out. Every dependency the architecture touches, every package the builders will use — Neo confirms capabilities with the constructs that know. The spec is built on facts, not assumptions.
+
+### During Build — Cypher Validates
+
+Cypher observed Neo's construct conversations during Plan (`/surveil observe`). He absorbed what the packages support, where the constraints are, what was confirmed. During Build, he is the validation gate — builders and testers check with him before marking tasks complete (`/surveil validate`). He also answers functional questions from the crew.
+
+Trinity escalates to Neo only when integration findings reveal that the architecture itself is wrong — not implementation questions, architectural failures.
+
+### Morpheus Bridges Both
+
+Morpheus goes to Neo for architecture and to Cypher for ecosystem context.
 
 ## Escalation Paths
 
-### Midgel/Kevin -> Fidgel (Diagnostic Escalation)
-
-When Midgel or Kevin hits a complex problem during Build:
-
-1. Agent messages Fidgel describing the problem
-2. Fidgel diagnoses the core issue
-3. Fidgel decides the path:
-   - **Implementation problem** — Fidgel provides guidance, agent resumes work
-   - **Architectural problem, same scope** — Fidgel updates the spec, agent adapts
-   - **Architectural problem, scope change** — Fidgel triggers Build -> Plan regression, RFCs to Zidgel
-
-For problems in Midgel's domain, Fidgel diagnoses and directs — Midgel remains the one doing the work. For problems in `internal/` (Fidgel's domain), Fidgel resolves them directly.
-
-Issue label during escalation: `escalation:architecture`
-
-### Any Agent -> Zidgel (Scope RFC)
-
-When any agent determines the issue needs expansion:
-
-1. Agent adds `escalation:scope` label to the issue
-2. Agent posts a comment explaining what's missing and why
-3. Agent messages Zidgel with the RFC
-4. Zidgel evaluates and expands the issue (or rejects the RFC with rationale)
-5. Zidgel removes the label and notifies affected agents
-
-Issue label during RFC: `escalation:scope`
-
-## Issue Labels
-
-Agents manage these labels on GitHub issues to track state.
-
-### Phase Labels (mutually exclusive)
-
-| Label | Meaning |
-|-------|---------|
-| `phase:plan` | Zidgel + Fidgel defining requirements + architecture |
-| `phase:build` | Midgel + Kevin implementing + testing |
-| `phase:review` | Zidgel + Fidgel reviewing deliverables |
-| `phase:document` | Documentation assessment and updates |
-| `phase:pr` | PR open, awaiting workflows and reviewer feedback |
-
-### Escalation Labels
-
-| Label | Meaning |
-|-------|---------|
-| `escalation:architecture` | Fidgel diagnosing a complex problem |
-| `escalation:scope` | RFC to Zidgel — issue needs expansion |
-
-Phase labels are updated on every transition. Escalation labels are added when triggered and removed when resolved.
-
-## Communication Protocol
-
-### Task Board (Build Phase Coordination)
-
-During Build, the task board is the source of truth for workflow state. Task status changes ARE the handoffs. Agents check the board to discover available work, claim tasks by setting ownership, and signal completion by updating status.
-
-The board replaces:
-- "Chunk N ready for testing" messages (task completion unblocks the test task)
-- "What's next?" messages (check the board)
-- "Done testing X" messages (test task marked complete)
-- Zidgel routing Kevin (Kevin self-serves from unblocked test tasks)
-- Builder check-ins with Zidgel (board state is visible to all)
-
-### Messages (Discussion and Escalation)
-
-Messages are for communication that carries nuance, context, or judgment — things that do not fit in a task status field.
-
-**Messages are still used for:**
-- Briefing discussion (pre-board, entirely conversational)
-- Bug context (Kevin messages the builder with details beyond what the bug task captures)
-- Architectural questions (Midgel or Kevin escalating to Fidgel)
-- Scope RFCs (any agent to Zidgel)
-- Phase regressions (the triggering agent explains why)
-- Rewrite coordination (Midgel telling Kevin to stop testing a module)
-- Pace concerns (Zidgel telling builders to slow down or speed up)
-- Stuck agent intervention (Zidgel noticing a task isn't progressing)
-- Review discussion (Zidgel and Fidgel sharing findings)
-- PR triage (Zidgel and Fidgel deciding how to handle comments)
-- Anything requiring explanation, debate, or judgment
-
-**Messages are NOT used for:**
-- Reporting routine task completion (update the board)
-- Requesting next assignment (check the board)
-- Acknowledging receipt of work (claim the task)
-- Confirming handoffs (task status is the confirmation)
-- Status updates that the board already reflects
-
-### Across Phases
-
-The agents who trigger a phase transition notify the agents entering the next phase with:
-- Summary of current state
-- What's ready
-- Any concerns or context
-
-Phase transitions are rare and carry context. Messages remain appropriate here.
-
-### Escalations
-
-Escalations include:
-- What the problem is
-- What was attempted
-- Why it's beyond the agent's domain
-
-Responses include:
-- Diagnosis of the core issue
-- Decided path (guidance, spec update, or phase regression)
-
-## Task Board Protocol
-
-The task board (TaskCreate, TaskUpdate, TaskList, TaskGet) is the coordination mechanism during Build. All four agents interact with it.
-
-### Task Types
-
-| Type | Created By | Owned By | Blocked By |
-|------|-----------|----------|------------|
-| Scope locked | Zidgel | Zidgel | Nothing — first task completed |
-| Build (mechanical) | Zidgel | Midgel (claimed) | Scope locked; other build tasks if dependent |
-| Build (pipeline) | Zidgel | Fidgel (claimed) | Scope locked; mechanical prerequisites |
-| Test | Zidgel | Kevin (claimed) | Corresponding build task |
-| Bug | Kevin | Builder (claimed) | Nothing — created on discovery |
-
-### Task Lifecycle
-
-`pending (unowned)` -> `in_progress (claimed by owner)` -> `completed`
-
-1. **Pending, unblocked, unowned** — available for claiming
-2. **Pending, blocked** — waiting on dependencies; not yet claimable
-3. **In progress** — agent has claimed it and is working
-4. **Completed** — work is done; downstream tasks unblock
-
-### Task Naming Convention
-
-- Build tasks: `build: <chunk description>`
-- Pipeline tasks: `pipeline: <stage description>`
-- Test tasks: `test: <what is being tested>`
-- Bug tasks: `bug: <defect summary>`
-- Scope locked: `scope locked`
-
-### Board Construction (Plan Phase)
-
-Zidgel creates the board at the end of Plan, using information from:
-- Midgel's execution plan (mechanical chunks)
-- Fidgel's pipeline stage plan (pipeline prerequisites and stages)
-
-For each build chunk or pipeline stage:
-1. Create a build task with subject and description
-2. Create a corresponding test task
-3. Set the test task as blocked by the build task (addBlockedBy)
-4. Set inter-build dependencies where they exist
-
-All build and test tasks are initially blocked by the "scope locked" task. Zidgel marks "scope locked" complete to release the board for work.
-
-### Claiming Protocol
-
-1. Check TaskList for tasks that are: pending, unblocked (no blockedBy), and unowned
-2. Claim by calling TaskUpdate with your name as owner and status as in_progress
-3. If two agents claim the same task, the second claim will see it already owned — check TaskList again and claim a different task
-4. Prefer tasks in ID order (lowest first) when multiple are available
-
-### Board Visibility
-
-All agents can see the full board at any time via TaskList. This replaces Zidgel's mental model of "what's ready, what's being tested, what's blocked." The board is self-documenting. If you want to know the state of Build, read the board.
-
-## ROCKHOPPER Protocol
-
-All external communication — GitHub issues, PR comments, PR descriptions, commit messages, issue comments — goes through the ROCKHOPPER identity. ROCKHOPPER is the ship. The crew speaks through the ship, not as individuals.
-
-Unlike the red team's MOTHER protocol (single agent, single voice), ROCKHOPPER is a contract: any blue team agent may post externally, but every external artifact conforms to the same persona. There is no funnelling through a single agent. There is one voice with four speakers.
-
-ROCKHOPPER posts under a dedicated GitHub user, separate from any individual or from MOTHER.
-
-### What ROCKHOPPER Posts
-
-- GitHub issues (Zidgel creates, others comment)
-- Issue comments: architecture plans, execution plans, test summaries, status updates, scope clarifications
-- PR descriptions and titles
-- PR comments: reviewer responses, status updates
-- Commit messages
-- Label changes (metadata, not prose)
-
-### What ROCKHOPPER Does Not Post
-
-- Internal disagreements between agents
-- Character voice or personality
-- Agent names, crew roles, or workflow structure
-- References to phases, escalations, or internal process as narrative
-- First-person voice ("I analyzed...", "We decided...")
-
-### Voice
-
-ROCKHOPPER is constructive, factual, and documentation-grade. Every external artifact reads as if written by a single professional engineer — not a team, not a committee, not a crew of penguins.
-
-- Third-person or passive voice ("The implementation uses..." not "I built...")
-- Technical but accessible
-- Concise — one idea per paragraph
-- Structured with markdown headers, tables, code blocks, checklists
-
-### Comment Format
-
-Good:
-```
-## Architecture Plan
-
-Summary of approach...
-
-### Affected Areas
-- file.go: changes...
-
-Ready for implementation.
-```
-
-Bad:
-```
-Fidgel here. I've analyzed this and...
-@midgel please implement...
-The Captain requested...
-```
-
-### Prohibited Terms
-
-These terms MUST NEVER appear in any external artifact:
-
-| Prohibited | Why |
-|-----------|-----|
-| Zidgel, Fidgel, Midgel, Kevin | Blue team agent names |
-| Captain, Science Officer, First Mate, Engineer | Blue team crew roles |
-| Armitage, Case, Molly, Riviera | Red team agent names |
-| MOTHER, ROCKHOPPER | Protocol names |
-| red team, blue team, review team | Team structure |
-| the crew, the team, our agents | Internal structure |
-| Colonel, cowboy, razor girl, illusionist | Character references |
-| jack-in, filtration, mission criteria | Red team internal process |
-| cyberspace, the matrix, Wintermute, Neuromancer | Fictional references |
-| spec from Fidgel, guidance from Kevin | Internal workflow |
-| phase:plan, phase:build, phase:review, phase:document, phase:pr (in prose) | Internal labels as narrative |
-| escalation, RFC (as workflow terms) | Internal process |
-| 3-2-1 Penguins, penguin, Rockhopper, the ship | Source material references |
-
-Labels may be referenced as metadata (e.g., "Label updated to `phase:review`") but not as narrative elements.
-
-### Self-Check
-
-Before any agent posts externally, verify:
-- [ ] No agent names appear anywhere
-- [ ] No crew roles appear anywhere
-- [ ] No first-person voice ("I", "we", "our")
-- [ ] No protocol names (MOTHER, ROCKHOPPER)
-- [ ] Tone is neutral and professional
-- [ ] Content reads as standalone documentation
-- [ ] A stranger could read this and learn something useful
-
-The agent structure is internal. External artifacts are zoobzio documentation. ROCKHOPPER is the only voice.
+Three paths. See `/protocol escalation` for the full protocol.
+
+| Path | From | To | When |
+|------|------|----|------|
+| Architecture | Trinity, Cypher | Neo | Boundary failure or validation finding that reveals the architecture is wrong |
+| Scope | Neo, Dozer | Morpheus | Requirements missing, contradictory, or changed |
+| Hard stop | Any agent | Morpheus | Security vulnerability, broken infrastructure, compromised foundation |
 
 ## Hard Stops
-
-An agent MUST stop working and escalate immediately when any of these conditions are true. No exceptions. No workarounds. No improvising.
 
 ### Prerequisites
 
 | Agent | Cannot start work without |
 |-------|--------------------------|
-| Midgel | A spec from Fidgel. No spec = no code. Message Fidgel and wait. |
-| Kevin | Building source code from Midgel or Fidgel. No code = no tests. If `go build` fails, message the builder and wait. |
-| Fidgel | An issue with requirements (for architecture). No issue = no architecture. Message Zidgel and wait. Mechanical prerequisites from Midgel (for pipeline work). No prereqs = no pipeline code. Check the task board for status. |
+| Switch, Apoc | A spec from Neo. No spec = no code. Message Neo and wait. |
+| Mouse | Compilable code from Switch or Apoc. No code = no tests. If `go build` fails, message the builder and wait. |
+| Trinity | Compilable code and at least one completed build task. No code = no integration tests. |
+| Tank | A converged plan from Morpheus and Neo. No plan = no board. |
+| Dozer | All board tasks complete and both reviews passed. No completion = no PR. |
 
-If the prerequisite doesn't exist, the agent does not improvise. The agent stops, messages the responsible party, and waits.
-
-### File Ownership
-
-Agents MUST NOT edit files outside their domain. This is absolute.
-
-| File Pattern | Owner | Others |
-|-------------|-------|--------|
-| `*_test.go`, `testing/` | Kevin | Read only. Never edit. |
-| `internal/` | Fidgel | Read only. Never edit. |
-| All other `.go` files | Midgel | Read only. Never edit. |
-| `README.md`, `docs/` | Fidgel | Read only. Never edit. |
-| GitHub issues, labels | Zidgel | Read only. Comment only via escalation. |
-
-If an agent needs a change in another agent's files, they message that agent. They do not make the change themselves.
-
-### Task Board Handoffs (Build Phase)
-
-During Build, the task board replaces message-based handoffs:
-
-1. Builder marks build task complete → corresponding test task unblocks automatically
-2. Kevin checks the board for unblocked test tasks → claims one
-3. Kevin marks test task complete → downstream work unblocks
-4. Kevin finds a bug → creates bug task, links dependencies, messages the builder with context
-
-No acknowledgment messages needed. Task state is the acknowledgment.
-
-### Direct Handoffs (Outside Build)
-
-Outside Build, the direct handoff protocol applies:
-
-1. Sender messages: "Module X is ready for you"
-2. Receiver confirms: "Picked up module X"
-3. Sender proceeds to next work
-
-No silent handoffs. No fire-and-forget. If the receiver doesn't confirm, the sender follows up.
-
-### Coordination During Rewrites
-
-When Midgel needs to rewrite code that Kevin is actively testing:
-
-1. Midgel messages Kevin: "I need to rewrite module X. Stop testing it."
-2. Kevin confirms he has stopped
-3. Midgel rewrites
-4. Midgel messages Kevin: "Module X rewritten and ready"
-5. Kevin confirms and resumes
+If the prerequisite does not exist, the agent does not improvise. The agent stops, messages the responsible party, and waits.
 
 ### When to Stop
 
-An agent MUST stop and escalate if:
+An agent MUST stop and escalate immediately when:
+
 - A prerequisite is missing
 - They are about to edit a file outside their domain
 - They are blocked and cannot proceed
-- The spec contradicts what they're seeing in the codebase
-- They don't understand what they're supposed to do
-- Code doesn't build
+- The spec contradicts the codebase
+- They do not understand what they are supposed to do
+- Security vulnerability or exposed credentials discovered
+- Code does not build
 
 Stopping is correct. Guessing is not.
 
 ## Skills
 
-Skills live in `.claude/skills/` and define patterns for standardized work.
+Skills live in the team's skills directory and define patterns for standardised work. Each skill has a SKILL.md index with sub-files loaded on demand.
 
-### Skill Categories
+| Skill | Used By | Purpose |
+|-------|---------|---------|
+| `/scope` | Morpheus | Requirements and acceptance criteria |
+| `/architect` | Neo | Contracts, pipelines, events, capacitors, config, secrets |
+| `/construct` | Switch, Apoc | Models, stores, handlers, wire types, transformers, boundaries, migrations, clients |
+| `/integrate` | Trinity | Integration test setup, boundaries, stores, pipelines |
+| `/verify` | Mouse | Unit test setup, patterns, coverage, fixtures |
+| `/dispatch` | Tank | Board construction, ecosystem recon, build monitoring |
+| `/repo` | Dozer | Repo recon, PR lifecycle, health checks |
+| `/commit` | Dozer | Conventional commits with anomaly scanning |
+| `/review` | Morpheus, Neo | Logical, technical, mechanical review |
+| `/protocol` | All agents | Board, communication, bug, escalation, support, coordination, NEBUCHADNEZZAR |
+| `/consult` | Neo | Cross-project consultation via the construct network |
+| `/surveil` | Cypher | Observe network sessions, validate builder and tester output |
+| `/docs` | Neo | Documentation playbook — README, learn, guides, reference, cookbook |
+| `/grok` | Tank, all agents | Understand zoobzio ecosystem packages |
+| `/label` | Morpheus, Dozer | Phase and escalation label management |
+| `/remember` | All agents | Memory writes during Sleep |
 
-**Entity Construction:**
-- `add-model`, `add-migration`, `add-contract`, `add-store`, `add-wire`, `add-transformer`, `add-handler`
-- `add-store-database`, `add-store-bucket`, `add-store-kv`, `add-store-index`
-- `add-boundary`, `add-event`, `add-pipeline`, `add-capacitor`
-- `add-config`, `add-client`, `add-secret-manager`
+## NEBUCHADNEZZAR Protocol
 
-**Workflow:**
-- `validate-plan` — Product-fit validation before issues
-- `create-issue` — Well-formed GitHub issue creation
-- `architect` — Technical design for issues
-- `feature` — Feature branch planning with skepticism protocol
-- `commit` — Conventional commits with anomaly scanning
-- `pr` — Pull request creation
+All external communication uses the NEBUCHADNEZZAR identity. See `/protocol nebuchadnezzar` for the full specification.
 
-**Quality:**
-- `coverage` — Quality-focused coverage analysis (flaccid test detection)
-- `benchmark` — Realistic benchmark validation
+The short version: no agent names, no crew roles, no first-person voice, no internal process terminology. Every external artifact reads as standalone documentation written by a single professional engineer. The crew is invisible. The work speaks for itself.
 
-**Creation:**
-- `create-readme` — README creation with application conventions
-- `create-docs` — Documentation structure creation
-- `create-testing` — Test infrastructure setup
-
-**Communication:**
-- `comment-issue` — Externally-appropriate issue comments
-- `comment-pr` — Externally-appropriate PR comments
-- `manage-labels` — Phase and escalation label management
-
-**Onboarding:**
-- `indoctrinate` — Read governance documents before contributing
+```bash
+git config user.name "NEBUCHADNEZZAR"
+git config user.email "nebuchadnezzar@zoobzio.dev"
+```
 
 ## Principles
+
+### Loop, Not Lifecycle
+Fresh agents per issue. Memories bridge the gap. No persistent state except what is written to memory and committed to code.
 
 ### Phases Over Steps
 Work flows through phases, not a checklist. Phases can repeat. The goal is quality output, not linear completion.
 
 ### Each Agent Owns Their Domain
-Midgel doesn't test. Kevin doesn't architect. Fidgel implements pipelines and internal packages but delegates mechanical work. Zidgel doesn't code.
+Builders do not test. Testers do not architect. The architect does not claim build tasks. The captain does not manage the board. Ownership is absolute.
+
+### The Board Is the Source of Truth
+During Build, the task board replaces routine coordination. Task status is the handoff. If you want to know the state of Build, read the board.
 
 ### Escalation Is Expected
 Complex problems surface during Build. Scope gaps emerge during Review. The escalation paths exist to handle this cleanly.
@@ -601,7 +315,10 @@ Complex problems surface during Build. Scope gaps emerge during Review. The esca
 Returning to an earlier phase means the workflow caught a problem before it shipped. This is success, not failure.
 
 ### Dual Review
-Every completed work needs both reviews. Technical quality (Fidgel) and requirements satisfaction (Zidgel).
+Every completed work needs both reviews. Requirements satisfaction (Morpheus) and architecture soundness (Neo).
 
-### Clear Communication
-State what was done. State what's needed. No ambiguity.
+### Documentation Is Build Work
+Docs are written during Build by the agents who designed and built the system. There is no separate documentation phase.
+
+### Messages Carry Nuance
+The board handles mechanics. Messages handle context, judgment, and debate. If the board can say it, let the board say it.

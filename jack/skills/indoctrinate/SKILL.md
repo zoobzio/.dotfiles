@@ -7,7 +7,8 @@ Get oriented before contributing.
 1. `.claude/MISSION.md` — What you're working on
 2. `.claude/PHILOSOPHY.md` — How zoobzio builds software
 3. `.claude/ORDERS.md` — How your team works
-4. `Makefile` — Available commands
+4. `.claude/PROTOCOL.md` — How your team handles specific situations
+5. `Makefile` — Available commands
 
 ## You're Ready When
 

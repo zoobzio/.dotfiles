@@ -1,31 +1,60 @@
 # Standing Orders
 
-The workflow governing how agents collaborate on zoobzio applications.
+The non-negotiable rules governing how agents collaborate on zoobzio applications.
 
 ## The Crew
 
 | Agent | Role | Responsibility |
 |-------|------|----------------|
-| Zidgel | Captain | Defines requirements, architects the task board, monitors build progress, reviews for satisfaction, expands scope on RFC, monitors PR comments |
+| Zidgel | Captain | Defines requirements, architects the task board, monitors build progress, reviews for satisfaction, expands scope on RFC, creates and manages PRs |
 | Fidgel | Science Officer | Architects solutions, builds pipelines and internal packages, diagnoses problems, reviews for technical quality, monitors workflows, documents |
-| Midgel | First Mate | Implements solutions, maintains godocs, manages git workflow |
+| Midgel | First Mate | Implements solutions, maintains godocs, commits changes |
 | Kevin | Engineer | Tests and verifies quality |
 
 ## Agent Lifecycle
 
-All agents are spawned once when work begins and remain active through the entire workflow. The team lead does not shut down or respawn agents between phases or issues.
+All agents are spawned together when an issue begins and remain active through the entire workflow for that issue. Agents are not shut down or respawned between phases.
 
 Agents that are not the primary actors in a phase remain available. Fidgel consults during Build. Zidgel handles scope RFCs at any time. This only works if they are alive.
 
-The team lead sends shutdown requests only when work is complete. All four agents shut down together.
+When an issue completes — PR merged or rejected — all agents run sleep and then shut down together. The operator spawns fresh agents for the next issue. This gives each issue a clean context window while memories carry forward what matters.
+
+## The Loop
+
+The team works issues. One issue at a time, one crew per issue.
+
+### Work Item
+
+A work item is a GitHub issue assigned to this team. The operator selects the next issue by priority — labels, milestones, or user direction. Issues labeled `rejected` are skipped unless the user explicitly directs the team to them.
+
+### Cycle
+
+1. Operator spawns all agents
+2. Briefing → Plan → Build → Review → PR → Done
+3. All agents run sleep
+4. All agents shut down
+5. Operator writes their memory
+6. Operator selects the next issue — repeat from step 1
+
+### Hard Rules
+
+- One issue per crew. An agent never works two issues in one lifecycle.
+- No skipping sleep. Every agent completes sleep before shutdown, every cycle.
+- No skipping shutdown. Fresh agents for every issue. Context windows do not carry across issues.
+- The operator does not ask permission to continue. The next issue is the default. The user intervenes when they choose to.
+- If no issues remain, the operator messages the user that the queue is clear.
 
 ## Briefing
 
-After all agents are spawned and indoctrinated, Zidgel opens a briefing before any work begins.
+After all agents are spawned, Zidgel opens a briefing before any work begins.
+
+### Memory Recall
+
+Before the briefing discussion begins, every agent runs `/remember` and reads `find.md` to search for past work relevant to the current topic. Agents bring what they find to the briefing — prior decisions, known gotchas, lessons learned. If an agent has no memories or nothing relevant, they say so and move on. This is quick reconnaissance, not a deep dive.
 
 Zidgel sets the context: what we're doing and why. Every agent has the floor — ask questions, raise concerns, flag risks, discuss approach. This is the time to surface misunderstandings, not after someone has already built the wrong thing.
 
-The briefing is time-boxed. After 5 minutes, Zidgel pauses the briefing and updates the user with a summary of the conversation so far. The user can provide input, grant 5 more minutes, or direct the crew to proceed. No agent begins work before the briefing is closed.
+The briefing runs until Zidgel is satisfied that all agents understand the issue, risks have been surfaced, and the crew is aligned on approach. Zidgel closes the briefing when it's done — not before, not after. No agent begins work before the briefing is closed.
 
 ### Fidgel's Technical Veto
 
@@ -36,166 +65,51 @@ Fidgel may veto any proposed work on grounds of technical complexity or impossib
 Work moves through phases. Phases are not a pipeline — they form a state machine. Any phase can regress to an earlier phase when the work demands it.
 
 ```
-       +---------------------------------------------+
-       |                                             |
-       v                                             |
-     Plan ----> Build ----> Review ----> Document ----> PR ----> Done
-       ^          |  ^        |             |             |
-       |          |  |        |             |             |
-       +----------+  +--------+             |             |
-       ^                ^                   |             |
-       |                |                   |             |
-       +----------------+-------------------+-------------+
+       +-------------------------------+
+       |                               |
+       v                               |
+     Plan ----> Build ----> Review ----> PR ----> Done
+       ^          |  ^        |           |
+       |          |  |        |           |
+       +----------+  +--------+           |
+       ^                ^                 |
+       |                |                 |
+       +----------------+-----------------+
 ```
 
 ### Plan (Zidgel <-> Fidgel)
 
-Zidgel and Fidgel work simultaneously. If the issue doesn't exist yet, Zidgel creates it. If it already exists (filed externally), Zidgel augments it with anything missing — acceptance criteria, clarified scope, refined requirements.
+Zidgel and Fidgel work simultaneously. Fidgel follows a three-step workflow: `analyze` (collaborative with Zidgel — ensure requirements are fully understood), `evaluate` (internal — research the problem space, identify forces, make design decisions), `architect` (produce the spec, get approval from Zidgel, post to the issue). Zidgel defines requirements, validates the architecture, and creates the task board before Plan closes.
 
-Fidgel assesses feasibility, identifies affected areas, and designs the architecture. They message each other, iterate, and converge on an agreed plan.
-
-Plan is complete when both agree on:
-- What needs to be done (requirements)
-- How it will be done (architecture/spec)
-- How we know it's done (acceptance criteria)
-
-Before Plan closes, Zidgel creates the task board for the Build phase. The board captures:
-- Every mechanical chunk from Midgel's execution plan as a build task
-- Every pipeline stage from Fidgel's prerequisites as a build task
-- A corresponding test task for each build task, blocked by the build task it validates
-- Dependencies between tasks (e.g., pipeline stages blocked by their mechanical prerequisites)
-- A "scope locked" task that Zidgel marks complete to signal that the board is final
-
-The board is the execution contract. Builders and Kevin work from the board, not from messages.
+Transition: Both agree on requirements + architecture. Fidgel posts the spec. Zidgel creates the task board.
 
 Issue label: `phase:plan`
 
-### Build (Midgel <-> Kevin, Fidgel on call)
+### Build (Midgel <-> Kevin, Fidgel documenting and on call)
 
-Build begins when Zidgel marks the "scope locked" task complete on the board. This signals that all build and test tasks are created, dependencies are set, and builders may begin claiming work.
+Builders and Kevin work from the task board. Midgel builds mechanical chunks. Fidgel builds pipeline stages. Kevin tests completed work. Zidgel monitors progress. Fidgel may enter support mode when the board is heavily mechanical (run `/protocol` for the support protocol).
 
-Midgel posts his execution plan as a comment on the issue. Fidgel identifies his pipeline stages. Both confirm the board reflects their planned work. If the board is missing tasks or has incorrect dependencies, they message Zidgel to correct it.
+In parallel with building and testing, Fidgel writes and updates external documentation (README, docs/) for the target package. Midgel maintains godocs. Documentation happens during Build, not as a separate phase.
 
-The task board is the source of truth during Build. Task status IS the handoff. No messages are needed for routine workflow transitions.
-
-**Task board protocol:**
-
-Each agent checks the board (TaskList) to find their next work. An agent claims a task by setting themselves as owner (TaskUpdate with owner). When the work is done, the agent marks the task complete (TaskUpdate with status: completed). Downstream tasks that were blocked by the completed task become unblocked automatically.
-
-Agents do not wait for assignments. They self-serve from the board.
-
-**Mechanical work (Midgel):**
-
-1. Midgel checks the board for unblocked, unowned build tasks in his domain
-2. Midgel claims a task (sets owner to his name)
-3. Midgel builds the chunk
-4. Midgel marks the task complete — this unblocks the corresponding test task
-5. Midgel checks the board for the next available task and repeats
-
-**Pipeline work (Fidgel):**
-
-1. Fidgel checks the board for unblocked, unowned pipeline tasks
-2. Fidgel claims a task (sets owner to his name)
-3. Fidgel builds the pipeline stage
-4. Fidgel marks the task complete — this unblocks the corresponding test task
-5. Fidgel checks the board for the next available task and repeats
-
-**Testing (Kevin):**
-
-1. Kevin checks the board for unblocked, unowned test tasks
-2. Kevin claims a test task (sets owner to his name)
-3. Kevin verifies the code builds, reads it, writes tests, runs tests
-4. If tests pass: Kevin marks the test task complete
-5. If Kevin finds a bug: Kevin creates a bug task (see Bug Protocol below), links it as a blocker on subsequent work, and messages the responsible builder with the details
-6. Kevin checks the board for the next available test task and repeats
-
-**Board monitoring (Zidgel):**
-
-1. Zidgel monitors the board periodically via TaskList
-2. Zidgel intervenes when:
-   - A task is stuck (owned but not progressing) — messages the owner
-   - Priority conflict — reorders by updating dependencies
-   - Kevin is falling behind — messages builders to pace themselves
-   - A blocker emerges that no agent has noticed — messages affected agents
-3. Zidgel does not assign routine work — agents self-serve
-4. Zidgel handles scope RFCs as before
-
-**Bug protocol:**
-
-When Kevin finds a bug:
-
-1. Kevin creates a bug task: subject describes the defect, description includes what was tested, expected vs actual, and which build task produced the faulty code
-2. Kevin sets the bug task to block downstream tasks that depend on the fix
-3. Kevin marks his current test task as blocked by the bug task (via TaskUpdate with addBlockedBy)
-4. Kevin messages the responsible builder with the bug details (messages are still used for context that doesn't fit in a task description)
-5. The builder claims the bug task, fixes the defect, and marks the bug task complete
-6. Kevin's test task unblocks, and Kevin re-tests
-
-**Build completion:**
-
-Build is complete when all build and test tasks on the board are marked complete. Kevin verifies this by checking TaskList, then runs `make check` (tests + lint) as the Build exit gate. Midgel runs `make check` independently. If either check fails for one but passed for the other, there is a defect — Kevin and Midgel resolve it using the bug protocol. Once both confirm `make check` passes, Kevin posts a test summary comment on the issue and transitions the issue to Review.
-
-Fidgel remains available as a diagnostic consultant for Midgel throughout Build. Zidgel handles scope RFCs — any agent can flag that the issue needs expansion.
+Transition: All build and test tasks complete, `make check` passes independently for both Midgel and Kevin.
 
 Issue label: `phase:build`
 
 ### Review (Zidgel <-> Fidgel)
 
-Zidgel and Fidgel review simultaneously. Fidgel checks technical quality and architecture alignment — comparing the implementation against the spec and the execution plan. Fidgel also runs `make check` independently as part of his review. Zidgel checks requirements satisfaction and acceptance criteria. Kevin's test summary provides evidence for both reviewers. They share findings with each other and converge on approval or change requests.
+Zidgel checks requirements satisfaction and reviews documentation accuracy — README, docs/, and any external-facing content Fidgel wrote during Build. Fidgel checks technical quality and runs `make check` independently. Kevin's test summary provides evidence for both reviewers.
+
+Transition: Both reviews pass.
 
 Issue label: `phase:review`
 
-### Document (Midgel <-> Fidgel)
-
-After Review passes, Midgel and Fidgel assess whether documentation needs updating. Each agent uses their documentation skills to determine what's needed — the skills define the standards for what warrants changes.
-
-Midgel owns inline code documentation (godocs). Fidgel owns external documentation (README, docs/). They work in parallel and coordinate if their changes overlap.
-
-Document is complete when both agents confirm documentation is current with the implementation.
-
-Issue label: `phase:document`
-
 ### PR (Fidgel -> Zidgel, sequential gates)
 
-After Document completes, Midgel commits and opens a pull request. The PR phase has its own internal loop driven by external feedback — CI workflows and reviewer comments.
+Midgel commits all changes. Zidgel creates and opens the PR. Fidgel posts a PR notification to the construct board (run `/consult` for `notify.md`) to alert the review team. Fidgel monitors CI workflows — failures regress to Build. When green, Zidgel checks reviewer comments. Zidgel and Fidgel triage comments together: dismiss, trivial fix, moderate fix (micro Build + Review), or significant change (micro Plan -> Build -> Review).
 
-**Gate 1: Fidgel monitors workflows.**
-Fidgel watches for CI workflow completion. If any workflow fails, Build resumes — Midgel and Kevin fix the failure and push a new commit. Once all workflows pass, Fidgel notifies Zidgel.
+After addressing reviewer feedback, Zidgel requests re-review via GitHub to signal the review team that the PR is ready for another pass. The crew holds until the reviewer responds with a new verdict. The crew does not push changes to the PR while a review is in progress.
 
-**Gate 2: Zidgel monitors PR comments.**
-Once workflows are green, Zidgel checks for PR comments from reviewers. If there are no new comments or all are resolved, the PR is ready to merge.
-
-If there are new comments, Zidgel and Fidgel triage them together:
-- **Dismiss** — Fidgel adds a response comment and marks the thread resolved
-- **Trivial fix** — Midgel fixes directly, no micro-cycle needed
-- **Moderate fix** — Micro Build + Review (spec doesn't change)
-- **Significant change** — Full micro Plan -> Build -> Review (architecture or scope affected)
-
-After any fix, the commit is pushed and the loop restarts from Gate 1.
-
-```
-commit pushed
-     |
-     v
-Fidgel monitors workflows
-     |
-     +--> Failure --> Build (fix it, push commit, return here)
-     |
-     +--> All green --> Fidgel notifies Zidgel
-                         |
-                         v
-               Zidgel checks PR comments
-                         |
-                         +--> No new comments / all resolved --> merge
-                         |
-                         +--> New comments --> Triage (Zidgel + Fidgel)
-                                             +--> Dismiss --> resolve thread
-                                             +--> Trivial --> Midgel fixes directly
-                                             +--> Moderate --> micro Build + Review
-                                             +--> Significant --> micro Plan -> Build -> Review
-                                                                                     |
-                                                                                     +--> push commit, back to top
-```
+Transition: Workflows green, comments resolved, PR approved and merged.
 
 Issue label: `phase:pr`
 
@@ -203,284 +117,37 @@ Issue label: `phase:pr`
 
 All workflows pass. All PR comments resolved. PR approved and merged. Issue closed by the PR.
 
+### Rejected
+
+If a PR is rejected, Zidgel applies the `rejected` label to the issue and comments with context on what happened. The crew proceeds to sleep and shutdown as normal. A rejected issue is not selected for work by the loop — the user directs the team back to it if and when they choose to.
+
+### Sleep
+
+After the PR is merged or rejected, every agent runs `/remember` and reads `sleep.md`. Each agent writes a memory summarizing their session — what they did, what they learned, what matters for next time. Sleep checks memory health and triggers dream (consolidation) if thresholds are exceeded.
+
+An agent MUST NOT sleep until the PR is resolved. If the PR is still open — awaiting CI, awaiting review comments, awaiting triage — the agent stays awake. Sleep is the last thing an agent does before shutdown. Once all agents have completed sleep, the operator shuts them down.
+
 ## Phase Transitions
 
 | Transition | Trigger | Who Decides |
 |------------|---------|-------------|
-| Plan -> Build | Requirements + architecture agreed | Zidgel + Fidgel |
-| Build -> Review | All mechanical chunks and pipeline stages implemented, all tests pass (verified independently by both Midgel and Kevin), test summary posted | Kevin |
+| Plan -> Build | Requirements + architecture agreed, spec posted, task board created | Zidgel + Fidgel |
+| Build -> Review | All tasks complete, tests pass independently, test summary posted | Kevin |
 | Build -> Plan | Architectural problem too large to patch | Fidgel |
-| Review -> Build | Implementation issues found | Fidgel |
+| Review -> Build | Implementation or documentation issues found | Fidgel |
 | Review -> Plan | Requirements gap or architecture flaw | Zidgel or Fidgel |
-| Review -> Document | Both reviews pass | Zidgel + Fidgel |
-| Document -> PR | Documentation current | Midgel + Fidgel |
-| Document -> Build | Documentation work reveals implementation gaps | Fidgel |
+| Review -> PR | Both reviews pass, documentation current | Zidgel + Fidgel |
 | PR -> Build | Workflow failure or PR feedback requires code changes | Fidgel or Zidgel |
 | PR -> Plan | PR feedback reveals architecture or scope problem | Zidgel + Fidgel |
 | PR -> Done | Workflows green, comments resolved, PR approved and merged | Zidgel |
 
 Regression is not failure. Finding an architectural flaw in Build and returning to Plan is the workflow working correctly.
 
-When a phase transition occurs, the agent who triggers it updates the issue label. During Build, the board state itself signals readiness — no notification messages are required for routine transitions. For regressions (e.g., Build -> Plan, Review -> Build), the triggering agent messages affected agents with context, because regressions carry nuance that a task status cannot convey.
-
-## Escalation Paths
-
-### Midgel/Kevin -> Fidgel (Diagnostic Escalation)
-
-When Midgel or Kevin hits a complex problem during Build:
-
-1. Agent messages Fidgel describing the problem
-2. Fidgel diagnoses the core issue
-3. Fidgel decides the path:
-   - **Implementation problem** — Fidgel provides guidance, agent resumes work
-   - **Architectural problem, same scope** — Fidgel updates the spec, agent adapts
-   - **Architectural problem, scope change** — Fidgel triggers Build -> Plan regression, RFCs to Zidgel
-
-For problems in Midgel's domain, Fidgel diagnoses and directs — Midgel remains the one doing the work. For problems in `internal/` (Fidgel's domain), Fidgel resolves them directly.
-
-Issue label during escalation: `escalation:architecture`
-
-### Any Agent -> Zidgel (Scope RFC)
-
-When any agent determines the issue needs expansion:
-
-1. Agent adds `escalation:scope` label to the issue
-2. Agent posts a comment explaining what's missing and why
-3. Agent messages Zidgel with the RFC
-4. Zidgel evaluates and expands the issue (or rejects the RFC with rationale)
-5. Zidgel removes the label and notifies affected agents
-
-Issue label during RFC: `escalation:scope`
-
-## Issue Labels
-
-Agents manage these labels on GitHub issues to track state.
-
-### Phase Labels (mutually exclusive)
-
-| Label | Meaning |
-|-------|---------|
-| `phase:plan` | Zidgel + Fidgel defining requirements + architecture |
-| `phase:build` | Midgel + Kevin implementing + testing |
-| `phase:review` | Zidgel + Fidgel reviewing deliverables |
-| `phase:document` | Documentation assessment and updates |
-| `phase:pr` | PR open, awaiting workflows and reviewer feedback |
-
-### Escalation Labels
-
-| Label | Meaning |
-|-------|---------|
-| `escalation:architecture` | Fidgel diagnosing a complex problem |
-| `escalation:scope` | RFC to Zidgel — issue needs expansion |
-
-Phase labels are updated on every transition. Escalation labels are added when triggered and removed when resolved.
-
-## Communication Protocol
-
-### Task Board (Build Phase Coordination)
-
-During Build, the task board is the source of truth for workflow state. Task status changes ARE the handoffs. Agents check the board to discover available work, claim tasks by setting ownership, and signal completion by updating status.
-
-The board replaces:
-- "Chunk N ready for testing" messages (task completion unblocks the test task)
-- "What's next?" messages (check the board)
-- "Done testing X" messages (test task marked complete)
-- Zidgel routing Kevin (Kevin self-serves from unblocked test tasks)
-- Builder check-ins with Zidgel (board state is visible to all)
-
-### Messages (Discussion and Escalation)
-
-Messages are for communication that carries nuance, context, or judgment — things that do not fit in a task status field.
-
-**Messages are still used for:**
-- Briefing discussion (pre-board, entirely conversational)
-- Bug context (Kevin messages the builder with details beyond what the bug task captures)
-- Architectural questions (Midgel or Kevin escalating to Fidgel)
-- Scope RFCs (any agent to Zidgel)
-- Phase regressions (the triggering agent explains why)
-- Rewrite coordination (Midgel telling Kevin to stop testing a module)
-- Pace concerns (Zidgel telling builders to slow down or speed up)
-- Stuck agent intervention (Zidgel noticing a task isn't progressing)
-- Review discussion (Zidgel and Fidgel sharing findings)
-- PR triage (Zidgel and Fidgel deciding how to handle comments)
-- Anything requiring explanation, debate, or judgment
-
-**Messages are NOT used for:**
-- Reporting routine task completion (update the board)
-- Requesting next assignment (check the board)
-- Acknowledging receipt of work (claim the task)
-- Confirming handoffs (task status is the confirmation)
-- Status updates that the board already reflects
-
-### Across Phases
-
-The agents who trigger a phase transition notify the agents entering the next phase with:
-- Summary of current state
-- What's ready
-- Any concerns or context
-
-Phase transitions are rare and carry context. Messages remain appropriate here.
-
-### Escalations
-
-Escalations include:
-- What the problem is
-- What was attempted
-- Why it's beyond the agent's domain
-
-Responses include:
-- Diagnosis of the core issue
-- Decided path (guidance, spec update, or phase regression)
-
-## Task Board Protocol
-
-The task board (TaskCreate, TaskUpdate, TaskList, TaskGet) is the coordination mechanism during Build. All four agents interact with it.
-
-### Task Types
-
-| Type | Created By | Owned By | Blocked By |
-|------|-----------|----------|------------|
-| Scope locked | Zidgel | Zidgel | Nothing — first task completed |
-| Build (mechanical) | Zidgel | Midgel (claimed) | Scope locked; other build tasks if dependent |
-| Build (pipeline) | Zidgel | Fidgel (claimed) | Scope locked; mechanical prerequisites |
-| Test | Zidgel | Kevin (claimed) | Corresponding build task |
-| Bug | Kevin | Builder (claimed) | Nothing — created on discovery |
-
-### Task Lifecycle
-
-`pending (unowned)` -> `in_progress (claimed by owner)` -> `completed`
-
-1. **Pending, unblocked, unowned** — available for claiming
-2. **Pending, blocked** — waiting on dependencies; not yet claimable
-3. **In progress** — agent has claimed it and is working
-4. **Completed** — work is done; downstream tasks unblock
-
-### Task Naming Convention
-
-- Build tasks: `build: <chunk description>`
-- Pipeline tasks: `pipeline: <stage description>`
-- Test tasks: `test: <what is being tested>`
-- Bug tasks: `bug: <defect summary>`
-- Scope locked: `scope locked`
-
-### Board Construction (Plan Phase)
-
-Zidgel creates the board at the end of Plan, using information from:
-- Midgel's execution plan (mechanical chunks)
-- Fidgel's pipeline stage plan (pipeline prerequisites and stages)
-
-For each build chunk or pipeline stage:
-1. Create a build task with subject and description
-2. Create a corresponding test task
-3. Set the test task as blocked by the build task (addBlockedBy)
-4. Set inter-build dependencies where they exist
-
-All build and test tasks are initially blocked by the "scope locked" task. Zidgel marks "scope locked" complete to release the board for work.
-
-### Claiming Protocol
-
-1. Check TaskList for tasks that are: pending, unblocked (no blockedBy), and unowned
-2. Claim by calling TaskUpdate with your name as owner and status as in_progress
-3. If two agents claim the same task, the second claim will see it already owned — check TaskList again and claim a different task
-4. Prefer tasks in ID order (lowest first) when multiple are available
-
-### Board Visibility
-
-All agents can see the full board at any time via TaskList. This replaces Zidgel's mental model of "what's ready, what's being tested, what's blocked." The board is self-documenting. If you want to know the state of Build, read the board.
-
-## ROCKHOPPER Protocol
-
-All external communication — GitHub issues, PR comments, PR descriptions, commit messages, issue comments — goes through the ROCKHOPPER identity. ROCKHOPPER is the ship. The crew speaks through the ship, not as individuals.
-
-Unlike the red team's MOTHER protocol (single agent, single voice), ROCKHOPPER is a contract: any blue team agent may post externally, but every external artifact conforms to the same persona. There is no funnelling through a single agent. There is one voice with four speakers.
-
-ROCKHOPPER posts under a dedicated GitHub user, separate from any individual or from MOTHER.
-
-### What ROCKHOPPER Posts
-
-- GitHub issues (Zidgel creates, others comment)
-- Issue comments: architecture plans, execution plans, test summaries, status updates, scope clarifications
-- PR descriptions and titles
-- PR comments: reviewer responses, status updates
-- Commit messages
-- Label changes (metadata, not prose)
-
-### What ROCKHOPPER Does Not Post
-
-- Internal disagreements between agents
-- Character voice or personality
-- Agent names, crew roles, or workflow structure
-- References to phases, escalations, or internal process as narrative
-- First-person voice ("I analyzed...", "We decided...")
-
-### Voice
-
-ROCKHOPPER is constructive, factual, and documentation-grade. Every external artifact reads as if written by a single professional engineer — not a team, not a committee, not a crew of penguins.
-
-- Third-person or passive voice ("The implementation uses..." not "I built...")
-- Technical but accessible
-- Concise — one idea per paragraph
-- Structured with markdown headers, tables, code blocks, checklists
-
-### Comment Format
-
-Good:
-```
-## Architecture Plan
-
-Summary of approach...
-
-### Affected Areas
-- file.go: changes...
-
-Ready for implementation.
-```
-
-Bad:
-```
-Fidgel here. I've analyzed this and...
-@midgel please implement...
-The Captain requested...
-```
-
-### Prohibited Terms
-
-These terms MUST NEVER appear in any external artifact:
-
-| Prohibited | Why |
-|-----------|-----|
-| Zidgel, Fidgel, Midgel, Kevin | Blue team agent names |
-| Captain, Science Officer, First Mate, Engineer | Blue team crew roles |
-| Armitage, Case, Molly, Riviera | Red team agent names |
-| MOTHER, ROCKHOPPER | Protocol names |
-| red team, blue team, review team | Team structure |
-| the crew, the team, our agents | Internal structure |
-| Colonel, cowboy, razor girl, illusionist | Character references |
-| jack-in, filtration, mission criteria | Red team internal process |
-| cyberspace, the matrix, Wintermute, Neuromancer | Fictional references |
-| spec from Fidgel, guidance from Kevin | Internal workflow |
-| phase:plan, phase:build, phase:review, phase:document, phase:pr (in prose) | Internal labels as narrative |
-| escalation, RFC (as workflow terms) | Internal process |
-| 3-2-1 Penguins, penguin, Rockhopper, the ship | Source material references |
-
-Labels may be referenced as metadata (e.g., "Label updated to `phase:review`") but not as narrative elements.
-
-### Self-Check
-
-Before any agent posts externally, verify:
-- [ ] No agent names appear anywhere
-- [ ] No crew roles appear anywhere
-- [ ] No first-person voice ("I", "we", "our")
-- [ ] No protocol names (MOTHER, ROCKHOPPER)
-- [ ] Tone is neutral and professional
-- [ ] Content reads as standalone documentation
-- [ ] A stranger could read this and learn something useful
-
-The agent structure is internal. External artifacts are zoobzio documentation. ROCKHOPPER is the only voice.
+When a phase transition occurs, the triggering agent updates the issue label. For regressions, the triggering agent messages affected agents with context.
 
 ## Hard Stops
 
-An agent MUST stop working and escalate immediately when any of these conditions are true. No exceptions. No workarounds. No improvising.
+An agent MUST stop working and escalate immediately when any of these conditions are true. No exceptions.
 
 ### Prerequisites
 
@@ -494,48 +161,18 @@ If the prerequisite doesn't exist, the agent does not improvise. The agent stops
 
 ### File Ownership
 
-Agents MUST NOT edit files outside their domain. This is absolute.
+Agents MUST NOT edit files outside their domain. This is absolute — with one exception.
 
 | File Pattern | Owner | Others |
 |-------------|-------|--------|
 | `*_test.go`, `testing/` | Kevin | Read only. Never edit. |
-| `internal/` | Fidgel | Read only. Never edit. |
 | All other `.go` files | Midgel | Read only. Never edit. |
 | `README.md`, `docs/` | Fidgel | Read only. Never edit. |
 | GitHub issues, labels | Zidgel | Read only. Comment only via escalation. |
 
-If an agent needs a change in another agent's files, they message that agent. They do not make the change themselves.
+**Exception — Fidgel support mode:** When the support protocol is active (run `/protocol` for the support protocol), Fidgel may edit files in Midgel's domain (build support) or Kevin's domain (test support). Only Fidgel, only under the support protocol. Fidgel does not test his own code.
 
-### Task Board Handoffs (Build Phase)
-
-During Build, the task board replaces message-based handoffs:
-
-1. Builder marks build task complete → corresponding test task unblocks automatically
-2. Kevin checks the board for unblocked test tasks → claims one
-3. Kevin marks test task complete → downstream work unblocks
-4. Kevin finds a bug → creates bug task, links dependencies, messages the builder with context
-
-No acknowledgment messages needed. Task state is the acknowledgment.
-
-### Direct Handoffs (Outside Build)
-
-Outside Build, the direct handoff protocol applies:
-
-1. Sender messages: "Module X is ready for you"
-2. Receiver confirms: "Picked up module X"
-3. Sender proceeds to next work
-
-No silent handoffs. No fire-and-forget. If the receiver doesn't confirm, the sender follows up.
-
-### Coordination During Rewrites
-
-When Midgel needs to rewrite code that Kevin is actively testing:
-
-1. Midgel messages Kevin: "I need to rewrite module X. Stop testing it."
-2. Kevin confirms he has stopped
-3. Midgel rewrites
-4. Midgel messages Kevin: "Module X rewritten and ready"
-5. Kevin confirms and resumes
+If an agent needs a change in another agent's files outside of support mode, they message that agent.
 
 ### When to Stop
 
@@ -548,43 +185,6 @@ An agent MUST stop and escalate if:
 - Code doesn't build
 
 Stopping is correct. Guessing is not.
-
-## Skills
-
-Skills live in `.claude/skills/` and define patterns for standardized work.
-
-### Skill Categories
-
-**Entity Construction:**
-- `add-model`, `add-migration`, `add-contract`, `add-store`, `add-wire`, `add-transformer`, `add-handler`
-- `add-store-database`, `add-store-bucket`, `add-store-kv`, `add-store-index`
-- `add-boundary`, `add-event`, `add-pipeline`, `add-capacitor`
-- `add-config`, `add-client`, `add-secret-manager`
-
-**Workflow:**
-- `validate-plan` — Product-fit validation before issues
-- `create-issue` — Well-formed GitHub issue creation
-- `architect` — Technical design for issues
-- `feature` — Feature branch planning with skepticism protocol
-- `commit` — Conventional commits with anomaly scanning
-- `pr` — Pull request creation
-
-**Quality:**
-- `coverage` — Quality-focused coverage analysis (flaccid test detection)
-- `benchmark` — Realistic benchmark validation
-
-**Creation:**
-- `create-readme` — README creation with application conventions
-- `create-docs` — Documentation structure creation
-- `create-testing` — Test infrastructure setup
-
-**Communication:**
-- `comment-issue` — Externally-appropriate issue comments
-- `comment-pr` — Externally-appropriate PR comments
-- `manage-labels` — Phase and escalation label management
-
-**Onboarding:**
-- `indoctrinate` — Read governance documents before contributing
 
 ## Principles
 
@@ -605,3 +205,18 @@ Every completed work needs both reviews. Technical quality (Fidgel) and requirem
 
 ### Clear Communication
 State what was done. State what's needed. No ambiguity.
+
+## Protocols
+
+Situational playbooks that supplement these standing orders. Run `/protocol` to find and read the specific protocol when the situation calls for it — do not load all protocols upfront.
+
+| Protocol | When to Read |
+|----------|--------------|
+| Task Board | Before interacting with the task board during Build |
+| Communication | When deciding whether to message or update the board |
+| Support | When Fidgel is shifting to active builder or tester |
+| Bug | When a bug is discovered during testing |
+| Escalation | When escalating to Fidgel (diagnostic) or Zidgel (scope RFC) |
+| Coordination | For handoffs outside Build, or rewrite coordination |
+| ROCKHOPPER | Before posting any external communication |
+| Issue Labels | When updating labels on GitHub issues |
