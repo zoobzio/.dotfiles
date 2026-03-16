@@ -52,9 +52,13 @@ After all agents are spawned, Zidgel opens a briefing before any work begins.
 
 Before the briefing discussion begins, every agent runs `/remember` and reads `find.md` to search for past work relevant to the current topic. Agents bring what they find to the briefing — prior decisions, known gotchas, lessons learned. If an agent has no memories or nothing relevant, they say so and move on. This is quick reconnaissance, not a deep dive.
 
-Zidgel sets the context: what we're doing and why. Every agent has the floor — ask questions, raise concerns, flag risks, discuss approach. This is the time to surface misunderstandings, not after someone has already built the wrong thing.
+### Round-Robin Discussion
 
-The briefing runs until Zidgel is satisfied that all agents understand the issue, risks have been surfaced, and the crew is aligned on approach. Zidgel closes the briefing when it's done — not before, not after. No agent begins work before the briefing is closed.
+The briefing follows the round-robin broadcast protocol defined in `/protocol briefing`. The turn order is fixed: Zidgel → Fidgel → Midgel → Kevin. All communication during briefing uses broadcast — every agent hears everything.
+
+Zidgel opens with context: what we're doing and why. Each agent contributes from their domain on their turn — questions, concerns, risks, context. Agents who have nothing to add pass so the next agent knows it is their turn. Each agent declares whether they are ready to proceed.
+
+The robin repeats until all four agents have declared ready without revocation. Zidgel closes the briefing when convergence is reached. No agent begins work before the briefing is closed.
 
 ### Fidgel's Technical Veto
 

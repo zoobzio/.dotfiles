@@ -1,3 +1,7 @@
+matrix:
+  homeserver: http://localhost:8008
+  registration_token: jack
+
 profiles:
   rockhopper:
     git:
@@ -6,7 +10,7 @@ profiles:
     github:
       user: rockhopper-zbz
     ssh:
-      key: ~/.ssh/rockhopper_ed25519
+      key: ~/.ssh/rockhopper
 
   nebuchadnezzar:
     git:
@@ -15,7 +19,7 @@ profiles:
     github:
       user: nebuchadnezzar-zbz
     ssh:
-      key: ~/.ssh/nebuchadnezzar_ed25519
+      key: ~/.ssh/nebuchadnezzar
 
   wintermute:
     git:
@@ -24,7 +28,7 @@ profiles:
     github:
       user: wintermute-zbz
     ssh:
-      key: ~/.ssh/wintermute_ed25519
+      key: ~/.ssh/wintermute
 
   enterprise:
     git:
@@ -33,4 +37,4 @@ profiles:
     github:
       user: enterprise-zbz
     ssh:
-      key: ~/.ssh/enterprise_ed25519
+      key: ~/.ssh/enterprise

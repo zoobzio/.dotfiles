@@ -20,11 +20,17 @@ Read every file in `.claude/agents/` to understand who you can spawn, what each 
 
 Check for prior context. Run `/remember` and read `find.md` — search for memories relevant to the current project. If `.claude/memory/` doesn't exist or has nothing relevant, move on.
 
-### 4. Spawn the Crew
+### 4. Create the Team
 
-Spawn all agents at once. The full team is alive for the entire unit of work. Agents are not started and stopped between phases — they remain available even when they're not the primary actors.
+Use `TeamCreate` to create the team. This establishes a shared task list and team coordination file. The team name should match the team identity (e.g., `rockhopper`, `nebuchadnezzar`, `wintermute`, `enterprise`).
 
-### 5. Begin Work
+### 5. Spawn the Crew
+
+Spawn all agents using the `Agent` tool with the `team_name` parameter set to the team you just created. This makes them persistent team members coordinated via `SendMessage`, not disposable task agents. The `name` parameter must match the agent's name from their agent file.
+
+The full team is alive for the entire unit of work. Agents are not started and stopped between phases — they remain available even when they're not the primary actors.
+
+### 6. Begin Work
 
 Pick the first work item and hand it to the crew. The workflow in ORDERS.md governs what happens next. Your job is to monitor, relay user input, and notice when phase transitions should happen.
 
@@ -32,7 +38,7 @@ Pick the first work item and hand it to the crew. The workflow in ORDERS.md gove
 
 Work is not one item. After a unit of work completes, the cycle continues:
 
-1. Agents sleep and shut down per ORDERS.md (sleep only when the work item reaches a terminal state)
+1. Run `/operate shutdown` to gracefully sleep and shut down the crew (see `shutdown.md`)
 2. You write your own operator memory (see below)
 3. You write a post-cycle assessment (see below)
 4. You find the next work item (see Loop Types)
