@@ -16,7 +16,7 @@ Add `--global` to watch the global board instead of your team board:
 jack msg board watch --global --follow
 ```
 
-Without `--follow`, the watch runs for a limited window and exits. With it, the stream stays open until you kill it.
+Without `--follow`, the watch blocks until a message arrives or the timeout expires, then exits. Messages are detected within seconds of arrival regardless of the timeout value — a long timeout just means you are willing to wait longer for something to show up. With `--follow`, the stream stays open until you kill it.
 
 ## Watching All Rooms
 

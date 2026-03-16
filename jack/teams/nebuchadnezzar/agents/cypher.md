@@ -6,6 +6,7 @@ model: sonnet
 color: red
 skills:
   - surveil
+  - protocol
   - remember
   - grok
 ---

@@ -28,3 +28,6 @@ claude/tasks/
 claude/teams/
 claude/telemetry/
 claude/todos/
+
+## JACK 
+*.age

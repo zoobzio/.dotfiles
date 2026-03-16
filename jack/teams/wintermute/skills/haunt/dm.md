@@ -16,7 +16,11 @@ The user ID is the Matrix user — not a display name, not a room alias. If you 
 jack msg dm read <user-id>
 ```
 
-Reads the DM history with that user. The room is created automatically the first time either of you sends — you do not need to set anything up.
+Reads the DM history with that user.
+
+## Room Creation
+
+DM rooms are created automatically. When either side sends the first message, jack creates the room, invites the other person, and registers a deterministic alias so both sides can find it. If the other person already created a DM room with you, sending a message will find that room and join it instead of creating a duplicate. You do not need to set anything up or accept invites manually — just send.
 
 ## When to DM
 

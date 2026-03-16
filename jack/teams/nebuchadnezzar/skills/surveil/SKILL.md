@@ -6,5 +6,5 @@ Read-only access to the construct network. You read messages. You do not send th
 
 | File | When |
 |------|------|
-| `observe.md` | During Plan — reading construct network sessions |
+| `observe.md` | During Plan — watching construct network sessions live |
 | `validate.md` | During Build — reviewing builder and tester output before task completion |

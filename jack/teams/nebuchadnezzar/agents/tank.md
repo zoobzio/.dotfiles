@@ -6,6 +6,7 @@ model: sonnet
 color: yellow
 skills:
   - dispatch
+  - protocol
   - remember
   - grok
   - label
