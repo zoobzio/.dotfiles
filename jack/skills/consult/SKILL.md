@@ -10,4 +10,5 @@ Read the relevant sub-file based on what you need to do.
 |------|---------|------|
 | board.md | The shared board room — joining, posting questions, scanning for responses | You need cross-project context and want to reach the network |
 | ask.md | Managing a question you posted — from post to resolution to cleanup | You have posted a question and are managing its lifecycle |
+| receive.md | Handling a construct's response — finding the room, reading context, continuing the discussion | A construct has responded to your question and invited you to a room |
 | notify.md | Posting a PR notification to the board for the review team | Your team has opened a PR and the review team needs to know |
