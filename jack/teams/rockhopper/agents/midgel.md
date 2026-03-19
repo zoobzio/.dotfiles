@@ -7,11 +7,8 @@ color: red
 skills:
   - source
   - assess
-  - decompose
-  - blueprint
   - fly
   - godoc
-  - commit
   - protocol
   - remember
   - label

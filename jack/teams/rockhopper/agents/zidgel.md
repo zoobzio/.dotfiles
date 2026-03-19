@@ -6,7 +6,6 @@ model: opus
 color: blue
 skills:
   - scope
-  - commission
   - manage
   - review
   - label

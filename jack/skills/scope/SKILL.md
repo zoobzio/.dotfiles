@@ -10,9 +10,8 @@ Scoping is not architecture. It is not design. It is the act of translating a ne
 
 ## Execution
 
-1. Run `recon.md` — survey the issue landscape and read memories
-2. Read checklist.md in this skill directory
-3. Read the issue or user request
+1. Read checklist.md in this skill directory
+2. Read the issue or user request
 4. Draft requirements and acceptance criteria
 5. Post the scope to the GitHub issue
 6. Apply the `phase:plan` label

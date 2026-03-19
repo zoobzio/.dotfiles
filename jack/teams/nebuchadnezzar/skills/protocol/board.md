@@ -1,6 +1,6 @@
 # Task Board
 
-The task board is the coordination mechanism during Build. Tank constructs it via `/dispatch`. Builders and testers self-serve from it. The board replaces routine coordination messages — task status is the handoff.
+The task board is the coordination mechanism during Build. Morpheus constructs two boards — one for the core subteam, one for the mechanical subteam. Agents self-serve from their board. Task status is the handoff.
 
 ## Claiming
 
@@ -12,17 +12,27 @@ The task board is the coordination mechanism during Build. Tank constructs it vi
 
 ## Who Does What
 
+### Core Board
+
 | Agent | Board Interaction |
 |-------|-------------------|
-| Tank | Constructs the board, monitors health, intervenes on stuck tasks |
+| Neo | Claims pipeline and infrastructure tasks, marks complete |
+| Trinity | Claims integration test tasks, marks complete |
+
+### Mechanical Board
+
+| Agent | Board Interaction |
+|-------|-------------------|
 | Switch | Claims unblocked build tasks, marks complete |
 | Apoc | Claims unblocked build tasks, marks complete |
 | Mouse | Claims unblocked unit test tasks, marks complete |
-| Trinity | Claims unblocked integration test tasks, marks complete |
-| Neo | Does not claim from the board — diagnoses problems, updates specs |
-| Morpheus | Does not claim from the board — available for support on any task |
-| Dozer | Does not interact with the board during Build — waits for completion |
-| Cypher | Does not interact with the board — validates builder and tester output before task completion |
+| Cypher | Does not claim from the board — validates builder and tester output before task completion |
+
+### Above Both
+
+| Agent | Board Interaction |
+|-------|-------------------|
+| Morpheus | Constructs both boards, monitors health, intervenes on stuck tasks, available for support |
 
 ## The Rule
 

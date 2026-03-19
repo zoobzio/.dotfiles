@@ -1,15 +1,14 @@
-# Assess Architecture Checklist
+# Assess Checklist
 
-## Phase 1: Verify Inputs
+## Phase 1: Read the Architecture
 
-- [ ] Architecture plan comment is available on the issue
-- [ ] `source/recon` assessment is available
-- [ ] Both inputs are consistent (architecture doesn't contradict recon findings)
-- [ ] Identify the architect for follow-up questions
+- [ ] Architecture spec is posted on the issue
+- [ ] Source recon findings from Briefing are available
+- [ ] Architecture doesn't contradict recon findings (if so, message Fidgel)
 
 ## Phase 2: Assess Each Element
 
-For each element in the architecture plan:
+For each element in the architecture spec:
 
 ### Buildability
 - [ ] Types are concrete enough to implement
@@ -37,41 +36,73 @@ For each element in the architecture plan:
 
 ## Phase 3: Question the Architecture
 
-- [ ] Underspecified types flagged and questioned via SendMessage
-- [ ] Unclear ownership flagged and questioned via SendMessage
-- [ ] Missing error paths flagged and questioned via SendMessage
-- [ ] Pattern conflicts flagged and questioned via SendMessage
-- [ ] Implicit dependencies flagged and questioned via SendMessage
-- [ ] Consumer experience concerns flagged and questioned via SendMessage
-- [ ] Naming concerns flagged and questioned via SendMessage
-- [ ] All questions sent directly to the architect
+- [ ] Underspecified types flagged and questioned via SendMessage to Fidgel
+- [ ] Unclear ownership questioned
+- [ ] Missing error paths questioned
+- [ ] Pattern conflicts questioned
+- [ ] Implicit dependencies questioned
 - [ ] Responses received and incorporated
+- [ ] OR: no questions needed — architecture is clear
 
-## Phase 4: Build Implementation Assessment
+## Phase 4: Identify Chunks
 
-### Per-Element Build Map
-For each element:
-- [ ] Files affected listed (new and modified)
-- [ ] Applicable pattern identified
-- [ ] Dependencies documented
-- [ ] Practical concerns noted
+### Find Natural Boundaries
+- [ ] Type definitions identified
+- [ ] Interface implementations identified
+- [ ] Standalone functions identified
+- [ ] Configuration and options identified
+- [ ] Error definitions identified
+- [ ] Wiring and integration points identified
 
-### Ordering Constraints
-- [ ] Foundational elements identified (must come first)
-- [ ] Independent elements identified (can be parallel)
-- [ ] Integration elements identified (must come last)
+### Validate Each Chunk
+- [ ] Compiles independently (`go build ./...` would pass)
+- [ ] Testable independently (Kevin can verify without waiting)
+- [ ] Has a clear boundary
+- [ ] Right-sized (not trivial, not monolithic)
+
+## Phase 5: Map Dependencies
+
+### Hard Dependencies
+- [ ] Type dependencies mapped
+- [ ] Function dependencies mapped
+- [ ] Interface dependencies mapped
 - [ ] No circular dependencies exist
 
-### Gap Analysis
-- [ ] Implied constructors identified
-- [ ] Implied validation logic identified
-- [ ] Implied error wrapping strategy identified
-- [ ] Test helper implications noted
+### Soft Dependencies
+- [ ] Pattern dependencies noted
+- [ ] Test dependencies noted
+- [ ] Recorded as ordering preference, not blockers
 
-## Phase 5: Compile Output
+## Phase 6: Optimise Order
 
-- [ ] Per-element build map complete
-- [ ] Ordering constraints documented
-- [ ] Gap analysis documented
-- [ ] Open questions listed (unresolved SendMessage threads)
-- [ ] Assessment feeds directly into `decompose`
+- [ ] Foundation chunks first (types, errors, interfaces)
+- [ ] Independent chunks early (unblocks the most)
+- [ ] Serial chains minimised
+- [ ] Builder/tester timeline mapped
+- [ ] Kevin has work after first chunk completes
+- [ ] No extended tester idle periods (>1 chunk cycle)
+
+## Phase 7: Assess Support Needs
+
+- [ ] Mechanical vs pipeline chunk ratio assessed
+- [ ] Kevin's idle periods identified
+- [ ] Whether support shortens the critical path evaluated
+- [ ] Support signal recorded with reasoning
+
+## Phase 8: Post Execution Plan
+
+- [ ] Overview section written
+- [ ] All chunks documented (name, scope, produces, depends on, test surface)
+- [ ] Dependency graph documented
+- [ ] Build order stated with rationale
+- [ ] Flow assessment included
+- [ ] Support signal stated
+- [ ] Every architectural element appears in at least one chunk
+- [ ] Posted via `gh issue comment`
+
+## Phase 9: Approval
+
+- [ ] Approval requested from Fidgel via SendMessage
+- [ ] If changes requested: plan updated, comment edited, confirmed with Fidgel
+- [ ] Fidgel has approved the execution plan
+- [ ] Execution plan is locked

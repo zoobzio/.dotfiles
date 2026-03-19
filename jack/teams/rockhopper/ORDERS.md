@@ -13,155 +13,170 @@ The non-negotiable rules governing how agents collaborate on zoobzio application
 
 ## Agent Lifecycle
 
-All agents are spawned together when an issue begins and remain active through the entire workflow for that issue. Agents are not shut down or respawned between phases.
+All agents are spawned together when a work item begins and remain active through the entire workflow. Agents are not shut down or respawned between phases.
 
 Agents that are not the primary actors in a phase remain available. Fidgel consults during Build. Zidgel handles scope RFCs at any time. This only works if they are alive.
 
-When an issue completes — PR merged or rejected — all agents run sleep and then shut down together. The operator spawns fresh agents for the next issue. This gives each issue a clean context window while memories carry forward what matters.
+When the workflow completes, all agents run sleep and then shut down together. The operator spawns fresh agents for the next work item. This gives each cycle a clean context window while memories carry forward what matters.
 
 ## The Loop
 
-The team works issues. One issue at a time, one crew per issue.
+The team works one item at a time, one crew per item. A work item is either an issue or a PR.
 
-### Work Item
+### Work Items
 
-A work item is a GitHub issue assigned to this team. The operator selects the next issue by priority — labels, milestones, or user direction. Issues labeled `rejected` are skipped unless the user explicitly directs the team to them.
+A work item is one of:
+
+- **Issue** — A GitHub issue assigned to this team. The output of the cycle is a new PR.
+- **PR** — A pull request with reviewer feedback, CI failures, or other responses requiring action. The output of the cycle is an augmented PR or a merge.
+
+The operator selects the next work item by priority — labels, milestones, or user direction. Issues labeled `rejected` are skipped unless the user explicitly directs the team to them.
 
 ### Cycle
 
-1. Operator spawns all agents
-2. Briefing → Plan → Build → Review → PR → Done
-3. All agents run sleep
-4. All agents shut down
-5. Operator writes their memory
-6. Operator selects the next issue — repeat from step 1
+1. Operator selects a work item (issue or PR)
+2. Operator spawns all agents
+3. Briefing → Plan → Build → Review → exit action
+4. All agents run sleep
+5. All agents shut down
+6. Operator writes their memory
+7. Repeat from step 1
+
+### Exit Actions
+
+The exit action is determined by the work item and the state of the PR:
+
+| Input | Condition | Action |
+|-------|-----------|--------|
+| Issue | Review passes | Midgel commits, Zidgel creates and opens the PR, Fidgel posts construct board notification |
+| PR | Review passes, changes were made | Midgel commits and pushes, Zidgel requests re-review |
+| PR | PR is approved and CI is green | Zidgel merges the PR and closes the issue |
+| PR | PR is rejected | Zidgel applies the `rejected` label to the issue, comments with context. Issue is removed from the queue unless the user directs the team back to it |
+
+Exit actions are not a phase. They are the mechanical result of a successful Review.
 
 ### Hard Rules
 
-- One issue per crew. An agent never works two issues in one lifecycle.
+- One item per crew. An agent never works two items in one lifecycle.
 - No skipping sleep. Every agent completes sleep before shutdown, every cycle.
-- No skipping shutdown. Fresh agents for every issue. Context windows do not carry across issues.
-- The operator does not ask permission to continue. The next issue is the default. The user intervenes when they choose to.
-- If no issues remain, the operator messages the user that the queue is clear.
-
-## Briefing
-
-After all agents are spawned, Zidgel opens a briefing before any work begins.
-
-### Memory Recall
-
-Before the briefing discussion begins, every agent runs `/remember` and reads `find.md` to search for past work relevant to the current topic. Agents bring what they find to the briefing — prior decisions, known gotchas, lessons learned. If an agent has no memories or nothing relevant, they say so and move on. This is quick reconnaissance, not a deep dive.
-
-### Round-Robin Discussion
-
-The briefing follows the round-robin broadcast protocol defined in `/protocol briefing`. The turn order is fixed: Zidgel → Fidgel → Midgel → Kevin. All communication during briefing uses broadcast — every agent hears everything.
-
-Zidgel opens with context: what we're doing and why. Each agent contributes from their domain on their turn — questions, concerns, risks, context. Agents who have nothing to add pass so the next agent knows it is their turn. Each agent declares whether they are ready to proceed.
-
-The robin repeats until all four agents have declared ready without revocation. Zidgel closes the briefing when convergence is reached. No agent begins work before the briefing is closed.
-
-### Fidgel's Technical Veto
-
-Fidgel may veto any proposed work on grounds of technical complexity or impossibility. This is not a disagreement — it is a hard stop. If Fidgel says something cannot be done as specified, Zidgel does not force the issue. Zidgel asks Fidgel for alternatives. Work proceeds on an approach both agree is feasible.
+- No skipping shutdown. Fresh agents for every work item. Context windows do not carry across cycles.
+- The operator does not ask permission to continue. The next item is the default. The user intervenes when they choose to.
+- If no items remain, the operator messages the user that the queue is clear.
 
 ## Phases
 
-Work moves through phases. Phases are not a pipeline — they form a state machine. Any phase can regress to an earlier phase when the work demands it.
+Work moves through four phases. The first three form a state machine — any phase can regress to an earlier phase when the work demands it. Briefing always runs first and does not regress.
 
 ```
-       +-------------------------------+
-       |                               |
-       v                               |
-     Plan ----> Build ----> Review ----> PR ----> Done
-       ^          |  ^        |           |
-       |          |  |        |           |
-       +----------+  +--------+           |
-       ^                ^                 |
-       |                |                 |
-       +----------------+-----------------+
+Briefing → Plan → Build → Review → exit action
+              ^      |  ^      |
+              |      |  |      |
+              +------+  +------+
 ```
 
-### Plan (Zidgel <-> Fidgel)
+### Wake Up (all agents)
 
-Zidgel and Fidgel work simultaneously. Fidgel follows a three-step workflow: `analyze` (collaborative with Zidgel — ensure requirements are fully understood), `evaluate` (internal — research the problem space, identify forces, make design decisions), `architect` (produce the spec, get approval from Zidgel, post to the issue). Zidgel defines requirements, validates the architecture, and creates the task board before Plan closes.
+After all agents are spawned, each agent runs two steps before the briefing begins:
 
-Transition: Both agree on requirements + architecture. Fidgel posts the spec. Zidgel creates the task board.
+1. **Remember** — run `/remember` to establish identity. Who they are, what they know, how they work.
+2. **Recon** — run their domain recon skill to survey the landscape for the work item.
+
+| Agent | Recon | Surveys |
+|-------|-------|---------|
+| Zidgel | `manage/recon` | GitHub issues — related, blocking, blocked, parallel opportunities |
+| Fidgel | `docs/recon` | Documentation landscape — completeness, accuracy, gaps |
+| Midgel | `source/recon` | Codebase — structure, patterns, complexity, integration points |
+| Kevin | `test/recon` | Test infrastructure — coverage, helpers, benchmarks, flaccid tests |
+
+Once remember and recon are complete, agents wait for their turn in the briefing.
+
+### Briefing (all agents, round-robin)
+
+The turn order is fixed: Zidgel → Fidgel → Midgel → Kevin. All communication uses broadcast — every agent hears everything.
+
+#### Round-Robin
+
+Zidgel opens with the work item context and his recon findings — for an issue: what it asks for, why it matters, any relevant labels or milestones, related or parallel issues. For a PR: what the PR does, what feedback was received, what the reviewers are asking for. Zidgel reads all unresolved comments and presents them to the crew. For PR inputs, this is where triage happens — the crew assesses the scope and severity of feedback together, which directly informs how Plan scales.
+
+On each turn, an agent answers any questions raised by previous turns and contributes their own recon findings, concerns, or questions from their domain. Agents who have nothing to add pass. The robin repeats until the crew converges on alignment — all agents agree on the shape of the work ahead. Zidgel closes the briefing. No agent begins work before the briefing is closed.
+
+#### Fidgel's Technical Veto
+
+Fidgel may veto any proposed work on grounds of technical complexity or impossibility. This is not a disagreement — it is a hard stop. If Fidgel says something cannot be done as specified, Zidgel does not force the issue. Zidgel asks Fidgel for alternatives. Work proceeds on an approach both agree is feasible.
+
+### Plan (Zidgel → Fidgel → Midgel → Kevin)
+
+Plan is sequential. Each step feeds the next:
+
+1. **Zidgel** runs `/scope` — posts requirements, acceptance criteria, and scope boundaries to the issue.
+2. **Fidgel** runs `/evaluate` — reads the scope, considers the forces, and produces the architecture spec. Posts to the issue.
+3. **Midgel** runs `/assess` — reads the architecture spec, breaks the work into independently-compilable and independently-testable chunks, determines build order, assesses whether support is needed during Build, and posts the execution plan to the issue. Fidgel approves the execution plan.
+4. **Kevin** runs `/follow` — reads the execution plan, designs the testing strategy per chunk, assesses flow and infrastructure needs, and posts the test plan to the issue. Midgel approves the test plan.
+
+Plan scales to the work item. A PR with a typo fix produces a thin plan. An issue requesting a new package gets a full cycle. The crew determined the scale during Briefing.
+
+Transition: Scope posted, architecture spec posted, execution plan approved, test plan approved.
 
 Issue label: `phase:plan`
 
-### Build (Midgel <-> Kevin, Fidgel documenting and on call)
+### Build (all agents)
 
-Builders and Kevin work from the task board. Midgel builds mechanical chunks. Fidgel builds pipeline stages. Kevin tests completed work. Zidgel monitors progress. Fidgel may enter support mode when the board is heavily mechanical (run `/protocol` for the support protocol).
+Zidgel creates the task board from the execution plan and test plan (run `/protocol` for the task board protocol). Build and test tasks are created with dependencies, all gated behind a "scope locked" task. Zidgel marks "scope locked" complete to release the board, which starts Build.
 
-In parallel with building and testing, Fidgel writes and updates external documentation (README, docs/) for the target package. Midgel maintains godocs. Documentation happens during Build, not as a separate phase.
+Once the board is live, agents pull tasks:
+
+- **Midgel** claims and builds chunks from the execution plan. Maintains godocs.
+- **Kevin** claims and tests completed chunks from the test plan.
+- **Fidgel** writes and updates external documentation (README, docs/). If Midgel's assessment signalled support, Fidgel enters support mode (run `/protocol` for the support protocol) and claims build or test tasks as well.
+- **Zidgel** monitors the board, intervenes on stuck tasks, handles scope RFCs.
+
+Agents self-serve — they check the board for unblocked, unowned tasks, claim them, complete them, and check again. The board is the source of truth. Documentation happens during Build, not as a separate phase.
 
 Transition: All build and test tasks complete, `make check` passes independently for both Midgel and Kevin.
 
 Issue label: `phase:build`
 
-### Review (Zidgel <-> Fidgel)
+### Review (all agents, round-robin)
 
-Zidgel checks requirements satisfaction and reviews documentation accuracy — README, docs/, and any external-facing content Fidgel wrote during Build. Fidgel checks technical quality and runs `make check` independently. Kevin's test summary provides evidence for both reviewers.
+Each agent independently reviews the work from their domain before the round-robin begins:
 
-Transition: Both reviews pass.
+- **Zidgel** — requirements satisfaction, documentation accuracy, scope alignment.
+- **Fidgel** — technical quality, architecture adherence, runs `make check` independently.
+- **Midgel** — implementation completeness, code patterns, godoc coverage.
+- **Kevin** — test coverage, test results, edge cases, runs `make check` independently.
+
+The round-robin follows the same mechanism as Briefing. Turn order: Zidgel → Fidgel → Midgel → Kevin. All communication uses broadcast. On each turn, an agent answers any questions raised by previous turns and contributes their own findings. The robin repeats until the crew converges on one of two outcomes:
+
+- **Regress** — issues were found. The crew agrees on what needs to change and which phase to return to (Build or Plan). The triggering agent messages affected agents with context.
+- **Exit** — the work is complete. The exit action is determined by the work item type and PR state.
 
 Issue label: `phase:review`
-
-### PR (Fidgel -> Zidgel, sequential gates)
-
-Midgel commits all changes. Zidgel creates and opens the PR. Fidgel posts a PR notification to the construct board (run `/consult` for `notify.md`) to alert the review team. Fidgel monitors CI workflows — failures regress to Build. When green, Zidgel checks reviewer comments. Zidgel and Fidgel triage comments together: dismiss, trivial fix, moderate fix (micro Build + Review), or significant change (micro Plan -> Build -> Review).
-
-After addressing reviewer feedback, Zidgel requests re-review via GitHub to signal the review team that the PR is ready for another pass. The crew holds until the reviewer responds with a new verdict. The crew does not push changes to the PR while a review is in progress.
-
-Transition: Workflows green, comments resolved, PR approved and merged.
-
-Issue label: `phase:pr`
-
-### Done
-
-All workflows pass. All PR comments resolved. PR approved and merged. Issue closed by the PR.
-
-### Rejected
-
-If a PR is rejected, Zidgel applies the `rejected` label to the issue and comments with context on what happened. The crew proceeds to sleep and shutdown as normal. A rejected issue is not selected for work by the loop — the user directs the team back to it if and when they choose to.
-
-### Sleep
-
-After the PR is merged or rejected, every agent runs `/remember` and reads `sleep.md`. Each agent writes a memory summarizing their session — what they did, what they learned, what matters for next time. Sleep checks memory health and triggers dream (consolidation) if thresholds are exceeded.
-
-An agent MUST NOT sleep until the PR is resolved. If the PR is still open — awaiting CI, awaiting review comments, awaiting triage — the agent stays awake. Sleep is the last thing an agent does before shutdown. Once all agents have completed sleep, the operator shuts them down.
 
 ## Phase Transitions
 
 | Transition | Trigger | Who Decides |
 |------------|---------|-------------|
-| Plan -> Build | Requirements + architecture agreed, spec posted, task board created | Zidgel + Fidgel |
-| Build -> Review | All tasks complete, tests pass independently, test summary posted | Kevin |
+| Briefing -> Plan | All agents converge on alignment, Zidgel closes briefing | Zidgel |
+| Plan -> Build | Scope posted, architecture spec posted, execution plan approved, test plan approved | All agents sequentially |
+| Build -> Review | All tasks complete, tests pass independently | Kevin |
 | Build -> Plan | Architectural problem too large to patch | Fidgel |
-| Review -> Build | Implementation or documentation issues found | Fidgel |
-| Review -> Plan | Requirements gap or architecture flaw | Zidgel or Fidgel |
-| Review -> PR | Both reviews pass, documentation current | Zidgel + Fidgel |
-| PR -> Build | Workflow failure or PR feedback requires code changes | Fidgel or Zidgel |
-| PR -> Plan | PR feedback reveals architecture or scope problem | Zidgel + Fidgel |
-| PR -> Done | Workflows green, comments resolved, PR approved and merged | Zidgel |
+| Review -> Build | Implementation or documentation issues found | Crew via round-robin |
+| Review -> Plan | Requirements gap or architecture flaw | Crew via round-robin |
+| Review -> exit | Crew converges on completion | Crew via round-robin |
 
 Regression is not failure. Finding an architectural flaw in Build and returning to Plan is the workflow working correctly.
 
 When a phase transition occurs, the triggering agent updates the issue label. For regressions, the triggering agent messages affected agents with context.
 
+## Sleep
+
+After the exit action completes, every agent runs `/remember` and reads `sleep.md`. Each agent writes a memory summarizing their session — what they did, what they learned, what matters for next time. Sleep checks memory health and triggers dream (consolidation) if thresholds are exceeded.
+
+Sleep is the last thing an agent does before shutdown. Once all agents have completed sleep, the operator shuts them down.
+
 ## Hard Stops
 
 An agent MUST stop working and escalate immediately when any of these conditions are true. No exceptions.
-
-### Prerequisites
-
-| Agent | Cannot start work without |
-|-------|--------------------------|
-| Midgel | A spec from Fidgel. No spec = no code. Message Fidgel and wait. |
-| Kevin | Building source code from Midgel or Fidgel. No code = no tests. If `go build` fails, message the builder and wait. |
-| Fidgel | An issue with requirements (for architecture). No issue = no architecture. Message Zidgel and wait. Mechanical prerequisites from Midgel (for pipeline work). No prereqs = no pipeline code. Check the task board for status. |
-
-If the prerequisite doesn't exist, the agent does not improvise. The agent stops, messages the responsible party, and waits.
 
 ### File Ownership
 
@@ -204,8 +219,8 @@ Complex problems surface during Build. Scope gaps emerge during Review. The esca
 ### Regression Is Healthy
 Returning to an earlier phase means the workflow caught a problem before it shipped. This is success, not failure.
 
-### Dual Review
-Every completed work needs both reviews. Technical quality (Fidgel) and requirements satisfaction (Zidgel).
+### Crew Review
+Every completed work is reviewed by all four agents. Each contributes from their domain — the round-robin surfaces issues that any single reviewer would miss.
 
 ### Clear Communication
 State what was done. State what's needed. No ambiguity.
@@ -216,6 +231,7 @@ Situational playbooks that supplement these standing orders. Run `/protocol` to 
 
 | Protocol | When to Read |
 |----------|--------------|
+| Review | At the start of Review phase — independent review then round-robin |
 | Task Board | Before interacting with the task board during Build |
 | Communication | When deciding whether to message or update the board |
 | Support | When Fidgel is shifting to active builder or tester |

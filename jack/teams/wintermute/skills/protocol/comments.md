@@ -29,7 +29,7 @@ Internal states are governed by existing protocols (cross-validation, filtration
 
 ## Rescoping (Armitage)
 
-When regression triggers, Armitage enumerates all WINTERMUTE comments on the PR and determines each comment's current state.
+On a re-review work item, Armitage enumerates all WINTERMUTE comments on the PR and determines each comment's current state.
 
 For each comment:
 1. Has the author replied? Check for replies in the thread.
@@ -78,7 +78,7 @@ When a comment reaches Accepted or Verified, Armitage resolves the PR conversati
 ## Escalation
 
 Armitage escalates a comment when:
-- Two full regression cycles have passed without progress on the same comment
+- Two full re-review cycles have passed without progress on the same comment
 - Case and Molly cannot reach agreement on whether to accept or contest
 - The author explicitly refuses to address a High or Critical finding
 

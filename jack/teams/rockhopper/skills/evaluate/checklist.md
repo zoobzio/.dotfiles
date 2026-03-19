@@ -1,20 +1,19 @@
 # Evaluate Checklist
 
-## Phase 1: Verify Input
+## Phase 1: Read the Scope
 
-- [ ] Confirmed understanding from `analyze` is available
-- [ ] Problem statement is clear and unambiguous
-- [ ] Requirements are stated as testable assertions
-- [ ] Scope boundaries and constraints are documented
+- [ ] Zidgel's scope is posted (requirements, acceptance criteria, boundaries)
+- [ ] Requirements are clear and testable
+- [ ] Scope boundaries are explicit
+- [ ] Cross-referenced with Briefing alignment — no contradictions
+- [ ] If scope contradicts briefing, messaged Zidgel before proceeding
 
-## Phase 2: Research
+## Phase 2: Consult the Construct Network
 
-### Targeted Investigation
-- [ ] Identify what research is needed (not all applies to every problem)
-- [ ] Codebase patterns and ecosystem context examined (`/grok`) — if relevant
-- [ ] Source landscape surveyed (`source/recon`) — if relevant
-- [ ] Documentation landscape surveyed (`docs/recon`) — if relevant
-- [ ] Research is targeted, not exhaustive
+- [ ] Assessed whether cross-repo consultation is needed
+- [ ] If needed: ran `/consult ask` for relevant context
+- [ ] If not needed: skipped — work is self-contained
+- [ ] Consultation findings incorporated into design thinking
 
 ## Phase 3: Identify Forces
 
@@ -53,17 +52,22 @@
 
 ## Phase 6: Check for Stalls
 
-- [ ] No unresolved ambiguity (if so, return to `analyze`)
+- [ ] No unresolved ambiguity (if so, message Zidgel)
 - [ ] No equally valid approaches left undecided (pick the simpler one)
 - [ ] Problem is not too large for scope (if so, RFC to Zidgel)
 - [ ] Codebase supports the chosen approach (if not, veto signal)
 
-## Phase 7: Compile Output
+## Phase 7: Produce the Spec
 
-- [ ] Forces documented
-- [ ] Chosen approach stated with rationale
-- [ ] Key decisions listed with reasons
-- [ ] Rejected alternatives noted (if applicable)
-- [ ] Risks identified
-- [ ] Open items for `architect` listed
-- [ ] Output feeds directly into `architect`
+### If Feasible
+- [ ] Architecture plan written with all sections
+- [ ] Summary, affected areas, approach, patterns, dependencies, test considerations, risks
+- [ ] Posted to issue: `gh issue comment [number] --body "[plan]"`
+- [ ] Indicated ready for implementation
+
+### If Concerns
+- [ ] Concerns documented with specific blockers
+- [ ] Options listed with tradeoffs
+- [ ] Recommendation provided
+- [ ] Posted to issue
+- [ ] Indicated clarification needed

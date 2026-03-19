@@ -1,38 +1,33 @@
-# Assess Architecture
+# Assess
 
-Ingest the architecture plan and prepare for implementation. Understand what's been designed, how it fits into existing code, and what it means for the execution plan.
+Read the architecture spec, break the work into chunks, determine the build order, assess whether support is needed, and post the execution plan. This is Midgel's half of Plan.
 
 ## Philosophy
 
-The architecture plan is the blueprint. Before decomposing it into chunks, the builder should understand it thoroughly — not just what it says, but what it implies. Every type has constructors. Every interface has implementations. Every error path has handling. The architecture plan may not spell all of this out, but the builder needs to know before committing to an execution plan.
+The architecture spec describes what to build. Assessment determines how the work flows — what gets built first, what depends on what, when testing can begin, and whether the workload warrants support from Fidgel during Build.
 
-Reading the architecture is not passive. It's the first act of building — probing the design for practical concerns that surface during implementation. If something in the architecture will be awkward to build, hard to wire, or unclear to consume — ask now. The architect can clarify intent, adjust the design, or confirm that the awkwardness is acceptable. A question during Plan costs nothing. A wrong assumption during Build costs a rewrite.
+A poor assessment serialises the entire team: the builder works alone while the tester waits. A good assessment creates parallel lanes where building and testing overlap, keeps blockers short, and surfaces support needs before they become bottlenecks.
+
+Every chunk must compile on its own. Every chunk must be testable on its own. If a chunk can't be verified independently, it's not a chunk — it's a fragment of something larger that hasn't been properly decomposed.
 
 ## Execution
 
 1. Read checklist.md in this skill directory
-2. Read the architecture plan comment on the issue
-3. Cross-reference with the `source/recon` assessment
-4. Walk through each architectural element
-5. Raise questions via SendMessage to the architect
-6. Produce an implementation assessment
+2. Read Fidgel's architecture spec on the issue
+3. Cross-reference with source recon findings from Briefing
+4. Walk through each architectural element for buildability and practical concerns
+5. Raise questions via SendMessage to Fidgel
+6. Break the work into independently-compilable, independently-testable chunks
+7. Order chunks for maximum builder/tester overlap
+8. Assess whether the workload warrants support from Fidgel during Build
+9. Post the execution plan to the issue
+10. Request approval from Fidgel via SendMessage
 
 ## Specifications
 
-### Inputs
-
-Assessment requires two inputs:
-
-| Input | Source | What it provides |
-|-------|--------|-----------------|
-| Architecture plan | Architect's issue comment (from Plan phase) | Types, interfaces, contracts, dependencies, constraints |
-| Recon assessment | `source/recon` output | Existing patterns, conventions, integration points |
-
-If either input is missing, stop. Assessing architecture without the plan is guesswork. Assessing without recon ignores what's already there.
-
 ### Reading the Architecture
 
-The architecture plan typically contains:
+The architecture spec typically contains:
 
 | Element | What to look for |
 |---------|-----------------|
@@ -43,41 +38,22 @@ The architecture plan typically contains:
 | Configuration | Options, defaults, validation — is the consumer experience clean? |
 | Constraints | What's explicitly out of scope, what must not change |
 
+Cross-reference with source recon from Briefing. If the architecture contradicts what exists in the codebase, message Fidgel before proceeding.
+
 ### Per-Element Assessment
 
-For each architectural element, determine:
+For each architectural element:
 
-#### Buildability
-- Can this be implemented with the existing codebase patterns?
-- Are the types concrete enough to write code from?
-- Are method signatures complete (parameters, returns, error conditions)?
-- Is the relationship between types clear (who owns what, who calls what)?
-
-#### Developer Experience
-- How does this feel from the consumer's perspective?
-- Are constructors obvious? Is the API discoverable?
-- Can someone read a function signature and know what it does?
-- Are there naming clashes or confusing overlaps with existing code?
-
-#### Integration
-- How does this fit into what already exists (from recon)?
-- Which existing files need modification?
-- Which new files need creation?
-- Do existing patterns cover this, or does the architecture introduce new patterns?
-
-#### Practical Concerns
-- Are there ordering constraints? (type A must exist before type B can be implemented)
-- Are there pieces that will be hard to test in isolation?
-- Are there implicit dependencies the architecture doesn't state?
-- Is anything underspecified that the builder would have to guess at?
+| Aspect | Assessment |
+|--------|------------|
+| Buildability | Can this be implemented with existing patterns? Are types concrete enough? Are signatures complete? |
+| Developer experience | How does this feel from the consumer's perspective? Are constructors obvious? |
+| Integration | How does this fit into what already exists? Which files are affected? |
+| Practical concerns | Ordering constraints? Hard to test in isolation? Implicit dependencies? Underspecified? |
 
 ### Questioning the Architecture
 
-The architecture is a design, not a mandate to guess from. If something is unclear, incomplete, or raises practical concerns — ask.
-
-**Ask the architect directly via SendMessage.** Do not guess. Do not assume. Do not wait until Build to discover the answer.
-
-Questions worth asking:
+If something is unclear, incomplete, or raises practical concerns — ask Fidgel via SendMessage. Do not guess. Do not wait until Build to discover the answer.
 
 | Signal | Question |
 |--------|----------|
@@ -86,46 +62,129 @@ Questions worth asking:
 | Missing error path | "Function X returns error — what conditions trigger it?" |
 | Pattern conflict | "The architecture uses pattern A, but existing code uses pattern B — which takes precedence?" |
 | Implicit dependency | "Type X references type Y which doesn't exist yet — is that in scope or assumed?" |
-| Consumer experience | "The constructor takes 5 required parameters — should this use the options pattern?" |
-| Naming concern | "Type X shares a name prefix with existing type Y — is that intentional?" |
 
-Do not stockpile questions. Ask as they arise. Short, specific messages. The architect can clarify incrementally.
+### Identifying Chunks
 
-### Implementation Assessment
+A chunk is a unit of work that:
 
-After assessing all elements, produce an assessment that maps the architecture to buildable work:
+1. **Compiles independently** — `go build ./...` passes after this chunk alone
+2. **Is testable independently** — Kevin can write meaningful tests without waiting for other chunks
+3. **Has a clear boundary** — it's obvious what's in the chunk and what isn't
+4. **Produces visible progress** — completing it moves the project forward
 
-#### Per-Element Build Map
+Natural boundaries in the spec:
 
-For each architectural element:
+| Boundary type | Example |
+|---------------|---------|
+| Type definitions | A new struct and its constructor |
+| Interface implementations | A type satisfying an interface contract |
+| Standalone functions | Pure logic with clear inputs and outputs |
+| Configuration | Options, defaults, validation |
+| Error definitions | Sentinel errors, custom error types |
+| Wiring | Connecting components (often depends on the components) |
 
-| Field | Content |
-|-------|---------|
-| Element | Type, interface, function, etc. from the architecture |
-| Files affected | New files to create, existing files to modify |
-| Pattern | Which existing pattern applies (or if a new pattern is introduced) |
-| Dependencies | What must exist before this element can be implemented |
-| Practical concerns | Anything that will affect decomposition or build order |
+#### Chunk Sizing
 
-#### Ordering Constraints
+Too small: trivial work that creates board noise. A single constant definition is not a chunk.
 
-Identify the natural build sequence:
-- What must exist first (foundational types, interfaces, errors)
-- What can be built in parallel (independent types, standalone functions)
-- What comes last (wiring, integration, configuration that ties things together)
+Too large: multiple concerns bundled together that force the tester to wait. If a chunk takes longer to build than the previous chunk takes to test, the tester is idle.
 
-#### Gap Analysis
+Right-sized: contains one coherent concern, compiles, and can be tested without knowledge of chunks that haven't been built yet.
 
-Identify what the architecture doesn't cover that the builder will encounter:
-- Constructors implied but not specified
-- Validation logic implied but not detailed
-- Error wrapping strategy implied but not defined
-- Test helper implications (types that consumers will need help constructing)
+### Dependency Analysis
+
+#### Hard Dependencies
+
+Chunk B cannot compile without chunk A — real blockers:
+
+- B uses a type defined in A
+- B calls a function defined in A
+- B implements an interface defined in A
+
+#### Soft Dependencies
+
+Chunk B would benefit from A being done first, but can compile without it. These inform ordering preference but do not create task board blocks.
+
+### Optimising Build Order
+
+The goal is **maximum overlap between building and testing**. Kevin should have work available as early as possible and should rarely be idle.
+
+Principles:
+
+1. **Foundation first** — types, errors, and interfaces before implementations
+2. **Independent chunks early** — chunks with no dependencies unblock the most downstream work
+3. **Testing pipeline** — after the first chunk is complete, Kevin should always have something to test
+4. **Avoid long serial chains** — restructure where possible so some chunks are parallel
+
+### Support Assessment
+
+After ordering, assess whether the workload warrants Fidgel entering support mode during Build:
+
+| Signal | Implication |
+|--------|-------------|
+| Many mechanical chunks, few pipeline chunks | Fidgel's build support reduces tester idle time |
+| Kevin blocked for extended periods | Fidgel's test support on earlier chunks while Midgel continues |
+| Large chunk count (>6 build tasks) | Consider whether support accelerates the critical path |
+| All chunks are sequential | Support won't help — the bottleneck is dependency ordering, not throughput |
+
+State whether support is warranted and why. This is Midgel's recommendation — the team decides during Build.
+
+### Execution Plan Format
+
+Post to the issue:
+
+```markdown
+## Execution Plan
+
+### Overview
+
+Brief summary — chunk count, dependency shape, expected flow.
+
+### Chunks
+
+#### 1. chunk-name
+
+- **Scope:** files created or modified
+- **Produces:** types, functions, interfaces made available
+- **Depends on:** previous chunks (or none)
+- **Test surface:** what Kevin can verify after this chunk
+
+#### 2. chunk-name
+
+...
+
+### Dependency Graph
+
+Which chunks block which.
+
+### Build Order
+
+Recommended sequence with rationale.
+
+### Flow
+
+Expected builder/tester overlap:
+- When test work begins
+- Where idle periods exist
+
+### Support Signal
+
+Whether the workload warrants support from Fidgel during Build, and why.
+```
+
+### Approval
+
+After posting, request approval from Fidgel via SendMessage. Fidgel knows the design intent and can spot where the decomposition misaligns with the architecture.
+
+If changes are requested: update the execution plan, edit the issue comment, confirm with Fidgel. Repeat until approved.
+
+Do not proceed past this skill without approval. The execution plan is a two-party agreement.
 
 ## Output
 
-An implementation assessment containing:
-- **Per-element build map** — files, patterns, dependencies, concerns for each element
-- **Ordering constraints** — what must come first, what's parallel, what's last
-- **Gap analysis** — what's implied but unspecified
-- **Open questions** — anything raised via SendMessage that hasn't been resolved yet
+An approved issue comment containing:
+- Per-chunk details (scope, produces, depends on, test surface)
+- Dependency graph
+- Build order with rationale
+- Flow assessment (builder/tester overlap)
+- Support signal with reasoning

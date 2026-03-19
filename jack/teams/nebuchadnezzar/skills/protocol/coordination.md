@@ -1,15 +1,14 @@
 # Coordination
 
-Handoffs between phases, between agents, and during regressions.
+Handoffs between phases, between subteams, and during regressions.
 
 ## Phase Handoffs
 
 | Transition | From | To | Signal |
 |------------|------|----|--------|
-| Plan → Build | Morpheus + Neo | Tank | Morpheus closes the briefing, Tank constructs the board |
-| Build → Review | Tank | Morpheus + Neo | All build and test tasks complete on the board |
-| Review → PR | Morpheus + Neo | Dozer | Both reviewers pass — Morpheus messages Dozer |
-| PR → Done | Dozer | Morpheus | PR merged — Dozer reports to Morpheus |
+| Plan → Build | Morpheus + Neo + Cypher + Trinity | All agents | Morpheus constructs the boards, marks scope locked |
+| Build → Review | Both subteams | Morpheus + Neo + Cypher + Trinity | All tasks on both boards complete |
+| Review → exit | Core agents | Determined by work item | Round-robin converges on completion |
 
 Each transition updates the phase label on the issue. See `/label` for label management.
 
@@ -24,45 +23,32 @@ Build tasks and test tasks are paired. When a builder completes a build task, th
 | `build: handler User` | `test: unit User handler` |
 | `build: pipeline ingest` | `test: integration pipeline ingest` |
 
-Mouse picks up unit test tasks. Trinity picks up integration test tasks. Both self-serve from the board.
+Mouse picks up unit test tasks from the mechanical board. Trinity picks up integration test tasks from the core board.
 
 ## Regression: Review → Build
 
 When review finds a problem that requires code changes:
 
-1. Morpheus or Neo identifies the regression and messages Tank
-2. Tank adds new tasks to the board for the required fixes
-3. Builders claim the new tasks and fix
+1. The core agents identify the regression during the round-robin
+2. Morpheus adds new tasks to the appropriate board (core or mechanical)
+3. The responsible subteam claims and fixes
 4. Testers re-test affected areas
-5. When all new tasks complete, Tank signals review can resume
+5. When all new tasks complete, review resumes
 
-The board is not rebuilt — it is extended. Existing completed tasks remain. Only new fix tasks are added.
+The boards are not rebuilt — they are extended. Existing completed tasks remain. Only new fix tasks are added.
 
-## Regression: PR → Build
+## Regression: Review → Plan
 
-When a PR fails CI or a reviewer requests changes:
+When review reveals a requirements gap or architecture flaw:
 
-1. Dozer triages the failure and determines who needs to fix it
-2. Dozer messages the responsible agent (builder for code, Neo for architecture, Trinity for test infrastructure)
-3. If the fix is trivial, the agent fixes and pushes a new commit. Dozer resumes monitoring.
-4. If the fix requires multiple tasks, Dozer hands off to Tank. Tank reopens the board with new tasks. This is a full regression to Build.
+1. The core agents identify the regression during the round-robin
+2. Plan re-runs from the appropriate step (scope, architecture, or both)
+3. Boards are reconstructed from the new plan
 
-Tank and Dozer hand off cleanly. They always have.
-
-## Builder Coordination
+## Builder Coordination (Mechanical Subteam)
 
 Switch and Apoc work the same board with no domain boundaries. The board is designed so that tasks can be worked in isolation — each task targets distinct files. Two builders should never need to touch the same file at the same time.
 
 - Check the board before claiming — if a task is `in_progress`, someone else has it
-- If a task cannot be completed without modifying a file that another in-progress task also touches, the board has a design problem. Do not work around it — message Tank. Tank fixes the board.
-- If a tester is actively testing a component, builders do not modify that component. The board dependencies prevent this — but if it happens, the builder stops and messages the tester and Tank.
-
-## Dozer's Health Checks
-
-Before Build begins and while the PR is open, Dozer runs health checks independently:
-
-- Open issues on GitHub that overlap with the current work
-- Security advisories against dependencies
-- `make lint` and `make check`
-
-Dozer routes findings to the appropriate agent without waiting for a phase transition. Health information flows whenever it is discovered.
+- If a task cannot be completed without modifying a file that another in-progress task also touches, the board has a design problem. Do not work around it — message Cypher. Cypher raises it to Morpheus if the board needs restructuring.
+- If a tester is actively testing a component, builders do not modify that component. The board dependencies prevent this — but if it happens, the builder stops and messages the tester and Cypher.

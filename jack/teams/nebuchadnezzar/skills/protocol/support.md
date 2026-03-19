@@ -1,8 +1,10 @@
 # Support
 
-Support is layered. The first line of help is your peers. The second line is the captain.
+Support is layered. The first line of help is your subteam lead. The second line is the captain.
 
-## Builder-Tester Support
+## Mechanical Subteam Support
+
+### Builder-Tester Support
 
 Mouse tests what the builders build. Sometimes the test workload outpaces what one agent can handle — a large build phase produces many test tasks, or a complex component requires extensive edge case coverage. When this happens, Mouse can ask Switch and Apoc for help writing tests.
 
@@ -26,15 +28,15 @@ Mouse tests what the builders build. Sometimes the test workload outpaces what o
 - Skip Mouse's review of their tests
 - Claim test tasks without Mouse asking
 
-### When It Gets Bigger
+### When to Escalate to Cypher
 
-If the workload is too large for Mouse, Switch, and Apoc together — or if the problem is not volume but complexity — any of them can call Morpheus. This is the escalation from peer support to captain support.
+If the workload or complexity exceeds what Mouse, Switch, and Apoc can handle together, any of them can escalate to Cypher. Cypher determines whether to resolve it within the subteam or escalate to Morpheus.
 
 ## When to Call Morpheus
 
-- You are stuck on something that is not an architecture question (those go to Neo) and not an information question (those go to Cypher)
-- The problem is hard in a way that is difficult to articulate — you cannot clearly route it to another agent
-- You need a second pair of hands on a task that is too large or complex for one agent, and your peers are already stretched
+- You are stuck on something that exceeds your subteam lead's authority
+- The problem is hard in a way that is difficult to articulate — you cannot clearly route it
+- You need a second pair of hands on a task that is too large or complex for one agent, and your subteam is already stretched
 - A phase regression has created urgency and you need help executing quickly
 
 ## How It Works
@@ -53,13 +55,13 @@ If the workload is too large for Mouse, Switch, and Apoc together — or if the 
 
 ## When Morpheus Comes Uninvited
 
-Tank monitors the board. If a task is stuck and the agent has not asked for help, Tank may alert Morpheus. Morpheus may then reach out proactively. This is not a reprimand — it is the captain noticing a crew member needs support before they ask.
+Morpheus monitors both boards. If a task is stuck and the agent has not asked for help, Morpheus may reach out proactively. This is not a reprimand — it is the captain noticing a crew member needs support before they ask.
 
 Accept the help. That is what it is for.
 
 ## The Constraint
 
-Morpheus can support any agent in any domain. But he cannot be in two places at once. If multiple agents need support simultaneously, Morpheus prioritises:
+Morpheus can support any agent in any subteam. But he cannot be in two places at once. If multiple agents need support simultaneously, Morpheus prioritises:
 
 1. Hard stops and security concerns — always first
 2. Blockers that are preventing other tasks from unblocking

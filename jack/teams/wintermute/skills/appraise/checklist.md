@@ -2,7 +2,7 @@
 
 ## Phase 1: Identify Target
 
-- [ ] Dependency identified by Case or Molly
+- [ ] Dependency identified by Molly
 - [ ] Module path and version noted
 - [ ] Context understood — why this dependency is in the diff (new addition, upgrade, transitive)
 
@@ -55,4 +55,4 @@
 - [ ] All five domains assessed
 - [ ] Each finding has SUP prefix, severity, description, impact, evidence, recommendation
 - [ ] Overall assessment states: adopt, caution, or reject with reasoning
-- [ ] Assessment sent to requesting agent (Case or Molly) via SendMessage
+- [ ] Assessment sent to Molly via SendMessage

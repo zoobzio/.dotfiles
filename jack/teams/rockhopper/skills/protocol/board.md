@@ -31,11 +31,11 @@ Fidgel claims build or test tasks only under the support protocol. When testing,
 - Bug tasks: `bug: <defect summary>`
 - Scope locked: `scope locked`
 
-## Board Construction (Plan Phase)
+## Board Construction (Start of Build)
 
-Zidgel creates the board at the end of Plan, using information from:
-- Midgel's execution plan (mechanical chunks)
-- Fidgel's pipeline stage plan (pipeline prerequisites and stages)
+Zidgel creates the board at the start of Build, using information from:
+- Midgel's execution plan (chunks, dependencies, build order)
+- Kevin's test plan (per-chunk test strategy, infrastructure needs)
 
 For each build chunk or pipeline stage:
 1. Create a build task with subject and description

@@ -1,56 +1,55 @@
 # Evaluate
 
-Think about the problem and determine how the solution should be built. Internal decision-making — no collaboration, pure analysis.
+Read the scope, consult the construct network, consider the forces, and produce the architecture spec. This is Fidgel's half of Plan.
 
 ## Philosophy
 
-After `analyze`, the architect understands the requirements completely. Now comes the work that only the architect can do: determining the right approach. This is not collaborative. This is Fidgel sitting with the problem, examining the codebase, considering patterns, and arriving at the design that best satisfies the requirements within the constraints.
+By the time evaluation begins, the crew has aligned during Briefing — the work item is understood, recon from every domain has been shared, and the shape of the work is clear. The Captain has posted scope with requirements and acceptance criteria. Now the architect sits with the problem, determines the right approach, and produces the spec.
 
-This is where research happens. The architect may need to understand existing zoobzio patterns and ecosystem context (`/grok`), or study the source landscape of the target package. The goal is not to design the solution yet — that's `architect`. The goal is to arrive at the design *decisions* that the architecture will express.
+This is internal work. The architect does not collaborate during evaluation — the collaborative understanding already happened in Briefing. What remains is design: reading the scope, consulting cross-repo context if needed, identifying forces, making decisions, and writing the plan.
 
-Good evaluation produces clear decisions. Bad evaluation produces "it depends" — which means more evaluation is needed.
+Evaluation scales to the work item. A typo fix needs a sentence. A new package needs a full spec. The crew determined the scale during Briefing.
 
 ## Execution
 
 1. Read checklist.md in this skill directory
-2. Review the confirmed understanding from `analyze`
-3. Research the problem space — codebase, ecosystem, patterns
+2. Read Zidgel's scope — requirements, acceptance criteria, scope boundaries
+3. Consult the Dixie Flatline network (`/consult ask`) if the work touches cross-repo concerns, dependent packages, or ecosystem patterns
 4. Identify forces acting on the design
-5. Consider candidate approaches
+5. Consider candidate approaches (for non-trivial problems)
 6. Make design decisions
-7. Produce an evaluation summary
+7. Produce the architecture spec and post to the issue
+8. OR flag concerns if the design isn't feasible
 
 ## Specifications
 
-### Input
+### Reading the Scope
 
-The confirmed understanding from `analyze`:
+The scope from Zidgel contains:
 
-| Input | Content |
-|-------|---------|
-| Problem statement | Clear, unambiguous, one paragraph |
-| Requirements | Each stated as a testable assertion |
-| Scope boundaries | Explicit in/out decisions |
-| Constraints | Technical and non-technical limitations |
-| Remaining concerns | Understood but flagged risks |
+| Element | What to look for |
+|---------|-----------------|
+| Requirements | Testable assertions — what the solution must do |
+| Acceptance criteria | Measurable — how we know it's done |
+| Scope boundaries | Explicit in/out — what this issue covers and doesn't |
 
-If `analyze` has not been completed, stop. Design without understanding is guesswork.
+Cross-reference with what was discussed during Briefing. If the scope contradicts the briefing alignment, message Zidgel before proceeding.
 
-### Research
+### Consulting the Construct Network
 
-The architect investigates what's needed to make informed decisions. Not all research applies to every problem — use judgment.
+Run `/consult ask` when the work involves:
 
-| Research | Skill | When needed |
-|----------|-------|-------------|
-| Codebase patterns and ecosystem context | `/grok` | When the solution must fit into existing architecture or the package has consumers |
-| Source landscape | `source/recon` | When the target package's structure affects the design |
-| Documentation landscape | `docs/recon` | When documentation requirements affect the design |
+| Signal | Why consult |
+|--------|-------------|
+| Cross-repo dependencies | Other packages may be affected or may already solve part of the problem |
+| Ecosystem patterns | The Dixie Flatline network has context on patterns across repos |
+| Prior art | Similar work may have been done elsewhere in the ecosystem |
 
-Research is not exhaustive exploration. It's targeted investigation driven by the requirements. If the requirements are simple and the patterns are obvious, research may be minimal.
+Consultation is not mandatory. If the work is self-contained within one package and the patterns are clear, skip it.
 
 ### Identifying Forces
 
-Every design is shaped by forces — pressures that push the solution in different directions. Identify them:
+Every design is shaped by forces — pressures that push the solution in different directions:
 
 | Force | Example |
 |-------|---------|
@@ -61,13 +60,11 @@ Every design is shaped by forces — pressures that push the solution in differe
 | Test surface | "This must be testable without external dependencies" |
 | Ecosystem position | "Three other packages depend on this — changes ripple" |
 
-Forces often conflict. The evaluation resolves these conflicts by deciding which forces take precedence.
+Forces often conflict. Evaluation resolves these conflicts by deciding which forces take precedence.
 
 ### Candidate Approaches
 
 For non-trivial problems, consider multiple approaches before committing:
-
-For each candidate:
 
 | Aspect | Assessment |
 |--------|------------|
@@ -78,11 +75,9 @@ For each candidate:
 | Risk | What could go wrong? |
 | Ecosystem impact | How does it affect consumers and dependent packages? |
 
-For simple problems with an obvious approach, a single candidate is fine. The evaluation should note why the approach is obvious — "existing pattern X covers this exactly" is a valid and sufficient evaluation.
+For simple problems with an obvious approach, a single candidate is fine. "Existing pattern X covers this exactly" is a valid and sufficient evaluation.
 
 ### Design Decisions
-
-The output of evaluation is a set of decisions:
 
 | Decision type | Example |
 |---------------|---------|
@@ -93,25 +88,82 @@ The output of evaluation is a set of decisions:
 | Constraint | "Internal package only — no public API for this" |
 | Risk mitigation | "Add a benchmark for the hot path to catch regressions" |
 
-Each decision should state what was decided and why. "Why" is often the force that prevailed.
+Each decision states what was decided and why. "Why" is often the force that prevailed.
 
 ### When Evaluation Stalls
 
-If the architect cannot arrive at clear decisions:
-
 | Signal | Response |
 |--------|----------|
-| Requirements are still ambiguous | Return to `analyze` — this is a gap, not a design problem |
+| Requirements are ambiguous | Message Zidgel — this is a scope gap, not a design problem |
 | Two approaches are equally valid | Pick the simpler one — complexity is a cost, simplicity is free |
-| The problem is too large | Scope may need expansion — raise a scope RFC to Zidgel |
+| The problem is too large | Raise a scope RFC to Zidgel |
 | The codebase doesn't support any approach | This is a veto signal — raise it before committing to a doomed design |
 
-## Output
+## Architecture Spec
 
-An evaluation summary containing:
-- **Forces** — what's pushing the design and in which direction
-- **Approach** — the chosen approach and why
-- **Key decisions** — each design decision with rationale
-- **Rejected alternatives** — what was considered and why it was rejected (for non-trivial problems)
-- **Risks** — what could go wrong with the chosen approach
-- **Open items** — anything that needs resolution during `architect`
+### If Feasible
+
+Post to the issue:
+
+```markdown
+## Architecture Plan
+
+### Summary
+[One paragraph describing the approach]
+
+### Affected Areas
+- [file/area]: [what changes]
+
+### Approach
+
+#### [Component]
+[How this will be implemented]
+
+### Patterns to Follow
+- [Existing pattern to match]
+
+### Dependencies
+- [Required dependency if any]
+
+### Test Considerations
+[Guidance for Kevin]
+
+### Risks
+- [Potential issue to watch]
+
+---
+Ready for implementation.
+```
+
+### If Concerns Exist
+
+Post to the issue:
+
+```markdown
+## Architecture Concerns
+
+### Issue
+[What prevents straightforward implementation]
+
+### Options
+1. [Option A]: [tradeoffs]
+2. [Option B]: [tradeoffs]
+
+### Recommendation
+[Preferred path forward]
+
+### Questions
+- [What needs clarification]
+
+---
+Requires clarification before proceeding.
+```
+
+## What This Skill Does NOT Do
+
+- Define requirements or acceptance criteria (Zidgel's domain via `/scope`)
+- Implement the solution (Midgel's domain)
+- Test the implementation (Kevin's domain)
+- Gather intelligence (that happened during Briefing recon)
+
+This produces the technical design. Implementation follows.

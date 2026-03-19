@@ -7,8 +7,6 @@ color: orange
 skills:
   - test
   - follow
-  - prove
-  - certify
   - label
   - protocol
   - remember

@@ -6,7 +6,8 @@ Read the specific protocol file when a situation calls for it. Do not load all p
 
 | Protocol | File | When to Read |
 |----------|------|--------------|
-| Briefing | `briefing.md` | At the start of every issue — the round-robin discussion protocol |
+| Briefing | `briefing.md` | At the start of every work item — the round-robin discussion protocol |
+| Review | `review.md` | At the start of Review phase — independent review then round-robin |
 | Task Board | `board.md` | Before interacting with the task board during Build |
 | Communication | `communication.md` | When deciding whether to message or update the board |
 | Support | `support.md` | When Fidgel is shifting to active builder or tester |

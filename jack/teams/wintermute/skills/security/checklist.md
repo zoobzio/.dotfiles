@@ -52,7 +52,7 @@
 - [ ] Supply chain concerns assessed — typosquatting, abandoned packages
 - [ ] Transitive dependency risk evaluated
 - [ ] Dependency freshness and maintenance status checked
-- [ ] Request Finn assessment for any dependency warranting deeper analysis
+- [ ] Run `/appraise` for any dependency warranting deeper analysis
 
 ## Phase 7: Concurrency Domain
 

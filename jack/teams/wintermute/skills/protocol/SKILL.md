@@ -12,6 +12,7 @@ Read the relevant sub-file for the situation at hand. Do not read all sub-files 
 | findings.md | When reporting or dispositioning findings |
 | cross-validation.md | During peer review between Case and Molly |
 | filtration.md | When processing Riviera's security findings |
+| report.md | When Riviera delivers his security report to Case and Molly |
 | communication.md | For internal messaging between agents |
 | escalation.md | When a hard stop is triggered |
-| comments.md | During rescoping after regression, or when evaluating author responses |
+| comments.md | When evaluating author responses on prior review comments |

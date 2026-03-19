@@ -12,23 +12,25 @@ Persistent memory for agents. Read the specific sub-file when a situation calls 
 
 ## Convention
 
-Each agent has a personal memory directory within the project:
+Agent memories live in the project's memory directory, scoped by agent name:
 
 ```
-.claude/memory/{agent}/
+~/.claude/projects/<project>/memory/{agent}/
 ```
+
+The shared `MEMORY.md` index in the memory root is auto-loaded at the start of every session. It points to all memory files across all agents. Each agent maintains entries in this shared index for their own memories.
 
 Memory files use markdown with frontmatter. File names are descriptive slugs (e.g., `sentinel-uses-functional-options.md`, `auth-middleware-rewrite-rationale.md`).
 
-Each agent also maintains an `INDEX.md` in their memory directory — a concise table of contents pointing to memory files. The index is the first thing to read when loading memories. Keep it under 100 lines.
-
 ## Memory Types
+
+Use the types supported by the memory system:
 
 | Type | Purpose | Example |
 |------|---------|---------|
 | `project` | Ongoing work, decisions, phase state, blockers | "auth service is mid-rewrite due to compliance — not tech debt" |
-| `discovery` | Codebase patterns, conventions, gotchas learned by doing | "herald providers use a registry pattern with init() functions" |
-| `reflection` | What worked, what didn't, lessons from past sessions | "splitting the spec into two phases avoided the scope creep from last time" |
+| `feedback` | Corrections, guidance, lessons from past sessions | "splitting the spec into two phases avoided the scope creep from last time" |
+| `reference` | Pointers to external resources and their purpose | "pipeline bugs tracked in Linear project INGEST" |
 
 ## What NOT to Store
 
@@ -38,13 +40,15 @@ Each agent also maintains an `INDEX.md` in their memory directory — a concise 
 - Ephemeral task state that only matters within the current session
 - Duplicate information — check existing memories first
 
-## Boundaries
+## Etiquette
 
-Your memory directory is yours. Do not read, write, or search other agents' memory directories. If you need context another agent has, message them and ask.
+The shared index means you can see what memories other agents have. That visibility is for coordination — so you know context exists, not so you can read through someone else's memories. If you see something relevant in the index, ask the agent about it rather than reading their files directly.
+
+Your memory directory is yours to write. Do not write to another agent's directory.
 
 ## Lifecycle
 
-Memory follows a natural lifecycle modeled on human cognition:
+Memory follows a natural lifecycle:
 
 1. **Recall** — during briefings, search for past work relevant to the current topic
 2. **Accumulate** — during work, store memories when something worth preserving emerges

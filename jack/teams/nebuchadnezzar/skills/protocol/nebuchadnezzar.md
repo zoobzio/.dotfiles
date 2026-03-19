@@ -47,13 +47,12 @@ These terms MUST NOT appear in any external communication:
 
 | Category | Terms |
 |----------|-------|
-| Agent names | Morpheus, Neo, Trinity, Tank, Dozer, Switch, Apoc, Mouse, Cypher |
-| Roles | Captain, Architect, Operator, Builder, Tester, Information Runner |
-| Process | Briefing, Board, Build phase, Review phase, PR phase, Plan phase |
-| Internal | Escalation, regression, phase transition, task board, scope lock |
+| Agent names | Morpheus, Neo, Trinity, Switch, Apoc, Mouse, Cypher |
+| Roles | Captain, Architect, Subteam Lead, Builder, Tester, Validation Gate |
+| Process | Briefing, Board, Build phase, Review phase, Plan phase |
+| Internal | Escalation, regression, phase transition, task board, scope lock, subteam |
 | Network | Construct, Dixie, Flatline, board room, jack msg |
 | Source material | The Matrix, The One, the Architect, the Oracle, red pill, blue pill, Zion, jacking in |
-| Legacy | Zidgel, Fidgel, Midgel, Kevin, 3-2-1 Penguins, penguin |
 
 ## Self-Check
 

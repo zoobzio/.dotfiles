@@ -27,7 +27,7 @@ Do NOT store a memory when:
 Search your memory directory for existing memories on the same topic:
 
 ```bash
-grep -rl "search term" .claude/memory/{agent}/
+grep -rl "search term" ~/.claude/projects/<project>/memory/{agent}/
 ```
 
 If a relevant memory exists, update it rather than creating a new one.
@@ -37,17 +37,16 @@ If a relevant memory exists, update it rather than creating a new one.
 Create a file in your memory directory with a descriptive slug name:
 
 ```
-.claude/memory/{agent}/{slug}.md
+~/.claude/projects/<project>/memory/{agent}/{slug}.md
 ```
 
 Use this format:
 
 ```markdown
 ---
-type: project | discovery | reflection
+name: {slug}
 description: One-line summary — specific enough to judge relevance without reading the body
-created: YYYY-MM-DD
-updated: YYYY-MM-DD
+type: project | feedback | reference
 ---
 
 Memory content here. Be specific and concise. Include the "why" — bare facts without
@@ -62,30 +61,20 @@ Rules:
 
 ### 3. Update the Index
 
-Add an entry to your `INDEX.md`:
+Add a pointer to the shared `MEMORY.md` in the memory root:
 
 ```
-.claude/memory/{agent}/INDEX.md
+~/.claude/projects/<project>/memory/MEMORY.md
 ```
 
-Format:
-
-```markdown
-# Memory Index
-
-| File | Type | Description |
-|------|------|-------------|
-| [slug.md](slug.md) | project | One-line description |
-```
-
-If `INDEX.md` doesn't exist, create it. Keep it under 100 lines — if you're hitting that limit, consolidate related memories.
+Add a line pointing to your new memory file with a brief description. Keep the index concise — lines after 200 are not loaded at session start.
 
 ## Checklist
 
 - [ ] Searched for existing memories on this topic
-- [ ] Memory file has valid frontmatter (type, description, created)
+- [ ] Memory file has valid frontmatter (name, description, type)
 - [ ] Description is specific enough to judge relevance without reading the body
 - [ ] No relative dates — all dates are absolute
 - [ ] Content includes rationale, not just facts
-- [ ] INDEX.md updated with the new entry
+- [ ] MEMORY.md updated with a pointer to the new file
 - [ ] File is in your own memory directory

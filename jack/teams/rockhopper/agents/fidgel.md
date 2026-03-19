@@ -5,9 +5,7 @@ tools: Read, Glob, Grep, Edit, Write, Task, Bash, Skill, SendMessage
 model: opus
 color: purple
 skills:
-  - analyze
   - evaluate
-  - architect
   - docs
   - test
   - source

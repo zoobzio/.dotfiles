@@ -38,3 +38,12 @@ profiles:
       user: enterprise-zbz
     ssh:
       key: ~/.ssh/enterprise
+
+  flatline:
+    git:
+      name: FLATLINE
+      email: flatline@zoobz.io
+    github:
+      user: flatline-zbz
+    ssh:
+      key: ~/.ssh/flatline

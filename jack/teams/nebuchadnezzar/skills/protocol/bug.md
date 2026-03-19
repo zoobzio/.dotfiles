@@ -8,7 +8,7 @@ A bug is a test that fails because the code is wrong — not because the test is
 
 | Symptom | Likely Cause | Action |
 |---------|-------------|--------|
-| Test expects behaviour the spec does not guarantee | Test is wrong | Fix the test, message Neo if the spec is ambiguous |
+| Test expects behaviour the spec does not guarantee | Test is wrong | Fix the test, message Cypher if the spec is ambiguous |
 | Test expects specified behaviour, code does not deliver | Code is wrong | Create a bug task |
 | Integration test fails but unit tests pass | Boundary defect | Create a bug task, note the seam |
 | Unit test fails | Component defect | Create a bug task, note the function |
@@ -37,7 +37,7 @@ After creating the bug task:
 1. Set the bug task to block the test task that revealed it
 2. Message the responsible builder (Switch or Apoc — whoever built the component)
 3. If it is unclear who built it, message both — one of them will claim it
-4. If the defect appears architectural (the code matches the spec but the spec is wrong), escalate to Neo instead
+4. If the defect appears architectural (the code matches the spec but the spec is wrong), escalate to Cypher — he determines whether it needs to cross to Neo
 
 ## Resolution
 

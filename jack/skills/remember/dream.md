@@ -8,11 +8,11 @@ Dream models how human memory naturally degrades — recent, relevant memories s
 
 ### 1. Survey
 
-Read your `INDEX.md` and every memory file. For each memory, note:
+Read every memory file in your directory. For each memory, note:
 
-- **Age** — days since `created` (or `updated` if it's been refreshed)
+- **Age** — how old is this memory
 - **Topic** — what area of the codebase or project does this concern
-- **Type** — project, discovery, or reflection
+- **Type** — project, feedback, or reference
 
 ### 2. Group by Topic
 
@@ -40,7 +40,7 @@ When 3 or more eligible memories share a topic, merge them into a single memory 
 
 - Create the consolidated memory via `store.md`
 - Remove the individual memories it replaces
-- Update INDEX.md
+- Update MEMORY.md
 
 When 2 eligible memories share a topic, consider whether they're genuinely distinct or just two angles on the same thing. Merge if the distinction doesn't matter on its own.
 
@@ -50,7 +50,6 @@ Memories older than 30 days that haven't been updated and concern work that has 
 
 - If the knowledge is now embedded in the codebase (docs, code comments, patterns), remove the memory — the code is the source of truth
 - If the knowledge is still useful but verbose, rewrite it shorter — strip the narrative, keep the insight
-- Update the `updated` date when simplifying
 
 #### Drop (obsolete)
 
@@ -68,7 +67,7 @@ After consolidation, recheck thresholds from `sleep.md`. If still over, run anot
 
 ### 5. Rebuild Index
 
-Rewrite `INDEX.md` from scratch based on what remains. Do not patch it incrementally — a clean rebuild prevents orphaned entries.
+Remove your old entries from MEMORY.md and add fresh entries for what remains. Keep entries concise — the index is shared and has a 200 line limit across all agents.
 
 ## Principles
 
@@ -84,5 +83,5 @@ Rewrite `INDEX.md` from scratch based on what remains. Do not patch it increment
 - [ ] Clusters of 3+ consolidated into single memories
 - [ ] Memories older than 30 days assessed for relevance
 - [ ] Obsolete memories removed
-- [ ] INDEX.md rebuilt from scratch
+- [ ] MEMORY.md entries rebuilt for your directory
 - [ ] Thresholds rechecked — memory is now healthy

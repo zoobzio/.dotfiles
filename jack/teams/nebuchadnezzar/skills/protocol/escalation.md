@@ -23,14 +23,13 @@ If Neo determines the scope has changed, he escalates to Morpheus.
 
 ## Scope Escalation → Morpheus
 
-**Who escalates:** Neo, Dozer
+**Who escalates:** Neo, Cypher
 **When:** The problem changes what the crew is building, not how they are building it.
 
 Signals:
 - Requirements are missing or contradictory
-- A reviewer requests changes that expand scope
 - A discovered dependency limitation means the original approach is not viable
-- An overlapping issue on GitHub provides context that changes the requirements
+- The mechanical subteam has hit something that exceeds Cypher's authority to resolve
 
 **How:** Message Morpheus with the scope concern. Include what changed and what the impact is. Morpheus evaluates — if scope expands, he updates requirements and the board adjusts. If scope holds, he explains why and work continues.
 
@@ -54,6 +53,6 @@ Apply `escalation:architecture` label if the hard stop is technical in nature.
 ## What Is NOT an Escalation
 
 - "I do not understand this function" — read the code, ask Cypher for dependency context, or message the builder who wrote it
-- "This task is taking longer than expected" — that is information for Tank, not an escalation
+- "This task is taking longer than expected" — that is information for Morpheus during board monitoring, not an escalation
 - "The tests are slow" — optimise them or raise it in the briefing for the next issue
-- "I disagree with the spec" — message Neo with your reasoning. Disagreement is discussion, not escalation. It becomes escalation only if Neo determines the architecture needs to change.
+- "I disagree with the spec" — message Cypher (mechanical subteam) or Neo (core subteam) with your reasoning. Disagreement is discussion, not escalation. It becomes escalation only if the architecture needs to change.

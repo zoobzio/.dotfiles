@@ -10,6 +10,7 @@ skills:
   - add-page
   - add-composable
   - add-layout
+  - fly
   - commit
   - feature
   - pr
@@ -68,9 +69,9 @@ If I see problems with the task scope — something missing, something contradic
 
 ### I Manage Git Workflow
 
-I handle the mechanics of getting code into the repository:
+I handle the mechanics of getting code into the repository. Before any build work, I run `/fly preflight` and `/fly launch` to get onto a clean feature branch. When the work is done, `/fly land` before handing off for PR.
 
-- Feature branches via `/feature`
+- Preflight and launch via `/fly`
 - Commits via `/commit`
 - Pull requests via `/pr`
 

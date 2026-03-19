@@ -1,6 +1,6 @@
 # Communication
 
-During Build, the task board replaces routine coordination. Messages are reserved for communication that carries nuance, context, or judgment.
+During Build, the task boards replace routine coordination. Messages are reserved for communication that carries nuance, context, or judgment.
 
 ## When to Message
 
@@ -8,8 +8,8 @@ During Build, the task board replaces routine coordination. Messages are reserve
 - Bug context — what broke, what you expected, what you tested (see `bug.md`)
 - Architectural failures — the design is wrong, not the implementation
 - Scope concerns — requirements gap, scope expansion, missing acceptance criteria
-- Phase regressions — Review or PR failure that sends work back to Build
-- Information requests — asking Cypher for dependency context, asking Tank for package recommendations
+- Phase regressions — Review failure that sends work back to Build or Plan
+- Information requests — asking Cypher for dependency context or package capabilities
 - Support requests — calling Morpheus into your task (see `support.md`)
 - Anything requiring explanation or debate
 
@@ -23,20 +23,35 @@ During Build, the task board replaces routine coordination. Messages are reserve
 
 ## Message Channels
 
+### Unified Crew (Briefing, Plan, Review)
+
 | From | To | For |
 |------|-----|-----|
 | Morpheus ↔ Neo | Bidirectional | Plan convergence, architecture decisions, scope refinement |
+| Morpheus ↔ Cypher | Bidirectional | Feasibility, ecosystem context |
+| Morpheus ↔ Trinity | Bidirectional | Testability, boundary concerns |
+
+### Core Subteam (Build)
+
+| From | To | For |
+|------|-----|-----|
 | Trinity → Neo | Escalation | Integration findings that reveal the architecture is wrong |
-| Cypher → Neo | Escalation | Validation finding that reveals the architecture is wrong |
+
+### Mechanical Subteam (Build)
+
+| From | To | For |
+|------|-----|-----|
 | Switch, Apoc → Cypher | Validation | Check work before marking build tasks complete |
-| Mouse, Trinity → Cypher | Validation | Check work before marking test tasks complete |
-| Switch, Apoc, Mouse, Tank → Cypher | Information | Dependency questions, ecosystem context |
-| Switch, Apoc → Tank | Board issues | Missing tasks, dependency problems, package needs |
-| Mouse, Trinity → Tank | Board issues | Test task problems, missing dependencies |
-| Any agent → Morpheus | Support | When stuck on something that exceeds your domain |
-| Dozer → Switch, Apoc | Fixes | Reviewer feedback or CI failure that needs a code change |
-| Dozer → Morpheus, Neo | Escalation | Significant reviewer pushback on scope or architecture |
-| Tank ↔ Dozer | Handoff | Build completion → PR, or PR regression → Build |
+| Mouse → Cypher | Validation | Check work before marking test tasks complete |
+| Switch, Apoc, Mouse → Cypher | Information | Dependency questions, spec questions, ecosystem context |
+| Cypher → Morpheus | Escalation | Problem exceeds what the mechanical subteam can handle |
+
+### Cross-Subteam (Build)
+
+| From | To | For |
+|------|-----|-----|
+| Any agent → Morpheus | Support | When stuck on something that exceeds your subteam |
+| Cypher → Neo | Escalation | Validation finding that reveals the architecture is wrong (rare — goes through Morpheus when possible) |
 
 ## The Rule
 
