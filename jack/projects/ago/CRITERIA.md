@@ -6,56 +6,56 @@ Secret, repo-specific review criteria. Only Armitage reads this file.
 
 ### What This Repo MUST Achieve
 
-- SagaStep registers compensation atomically with step execution
-- Compensate rolls back in LIFO order with idempotency per step
-- WithSaga provides exclusive access — no concurrent mutations to same saga
-- Signal emission happens AFTER WithSaga returns (outside lock)
-- Request/Await correctly correlate responses by correlation ID
-- RecoverSagas finds and compensates running/compensating/expired sagas
-- All primitives implement pipz.Chainable[*Flow[T]] correctly
-- IdempotencyKey format is consistent for execute and compensation
+- Tool registration produces correct JSON Schema from Go types via sentinel
+- Handler dispatch correctly deserializes JSON input into typed structs
+- Input validation runs before handler execution — invalid input never reaches the handler
+- ToolExecutor interface returns complete, correct tool definitions for LLM consumption
+- ToolExecutor.Execute dispatches to the correct handler by name
+- Middleware chain executes in order on every tool call without exception
+- Tool errors serialize cleanly as tool results — no panics, no silent failures
+- Capitan signals fire for every tool call with structured context (name, duration, error)
 
 ### What This Repo MUST NOT Contain
 
-- Workflow definition DSL or visual designer
-- Cron or scheduled triggers
-- Long-running process management
-- Distributed lock management beyond saga state
+- LLM API calls or provider interaction
+- Tool execution loop logic (call LLM, dispatch, loop)
+- Conversation state management
+- Business logic or domain-specific tool implementations
+- Workflow orchestration, sagas, or compensation
 
 ## Review Priorities
 
-1. Saga correctness: compensation must run all steps in LIFO order without skipping
-2. Idempotency: duplicate step execution must not corrupt state
-3. Crash recovery: RecoverSagas must handle all incomplete states (running, compensating, expired)
-4. Correlation: request/await must match responses by correlation ID without cross-talk
-5. Exclusivity: WithSaga must prevent concurrent mutations to same saga
-6. Signal ordering: emission must happen after state persistence, not before
+1. Security boundary: unregistered tool names must be rejected, not silently ignored
+2. Input validation: malformed JSON and failed validation must produce clear error results, not panics
+3. Schema correctness: generated tool schemas must match the actual handler input types exactly
+4. Context propagation: tenant ID, trace ID, session ID must flow to handlers via context
+5. Middleware ordering: middleware must execute in registration order, wrapping the handler
+6. Error isolation: a handler panic must be recovered and returned as a tool error result
 
 ## Severity Calibration
 
 | Condition | Severity |
 |-----------|----------|
-| Compensation skips a step | Critical |
-| Duplicate execution corrupts saga state | Critical |
-| Signal emitted before state persisted | Critical |
-| WithSaga allows concurrent mutation | Critical |
-| RecoverSagas misses incomplete saga | High |
-| Request/Await matches wrong correlation | High |
-| Dead letter loses error context | High |
-| Flow field access races under concurrent use | Medium |
-| Timeout default not documented | Low |
+| Unregistered tool name executes a handler | Critical |
+| Handler receives input that failed validation | Critical |
+| Tool schema doesn't match actual input type | Critical |
+| Handler panic crashes the process instead of returning error | Critical |
+| Context missing tenant ID when handler expects it | High |
+| Middleware skipped for some tool calls | High |
+| Tool error result loses error message or context | High |
+| Schema generation fails silently (empty schema) | Medium |
+| Capitan signal missing for failed tool call | Medium |
+| Autodoc catalog incomplete or stale after registration | Low |
 
 ## Standing Concerns
 
-- At-least-once delivery means handlers MUST deduplicate — verify IdempotencyKey is always available
-- MemoryStore uses deep copies — verify no mutation of returned state
-- CerealStore uses SELECT FOR UPDATE — verify deadlock potential with multiple sagas
-- Flow[T] RWMutex on field map — verify no deadlock in nested field access
-- RecoverSagas must be called at startup — verify documentation is prominent
+- JSON Schema generation via sentinel must handle nested structs, slices, maps, pointers correctly
+- Verify that concurrent tool calls (multiple Engage loops) don't race on shared registry state
+- Verify that tool handler timeouts produce clean error results, not context deadline errors
+- The ToolExecutor interface is cogito's contract — changes break cogito. Treat as stable API.
 
 ## Out of Scope
 
-- At-least-once (not exactly-once) delivery is by design — handlers own deduplication
-- Flow[T] not safe for cross-goroutine use is intentional — sequential pipeline processing
-- sqlx dependency for CerealStore is intentional for PostgreSQL production use
-- MemoryStore for testing only is intentional
+- Using zyn's tool definition types (not ago's own) is intentional — single source of truth
+- No built-in tool handler implementations is intentional — application defines all handlers
+- At-most-once execution per tool call is by design — the LLM retries by issuing a new call

@@ -1,3 +1,10 @@
+---
+name: grok
+description: Understand the zoobzio Go ecosystem — package map, dependency flows, shared conventions. Read before working on any zoobzio package or reviewing cross-package changes.
+user-invocable: false
+allowed-tools: Read
+---
+
 # Grok
 
 Understand the zoobzio ecosystem — what packages exist, how they relate, and what role each plays.

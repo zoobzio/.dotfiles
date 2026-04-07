@@ -1,0 +1,15 @@
+#!/bin/bash
+# ICE launcher — called by systemd service.
+# Activates the venv and runs the classifier daemon.
+set -e
+
+ICE_DIR="$HOME/.local/share/ice"
+VENV_DIR="$ICE_DIR/venv"
+
+if [ ! -d "$VENV_DIR" ]; then
+    echo "ice: venv not found at $VENV_DIR — run setup.sh first" >&2
+    exit 1
+fi
+
+source "$VENV_DIR/bin/activate"
+exec python "$HOME/.config/ice/ice.py"

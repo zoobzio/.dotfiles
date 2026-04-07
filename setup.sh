@@ -131,16 +131,37 @@ nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
 echo "#> Neovim plugins synced"
 
 # ──────────────────────────────────────────────
+# ICE (Prompt Injection Classifier)
+# ──────────────────────────────────────────────
+echo "#> Setting up ICE classifier..."
+
+ICE_DIR="$HOME/.local/share/ice"
+mkdir -p "$ICE_DIR"
+python3 -m venv "$ICE_DIR/venv"
+"$ICE_DIR/venv/bin/pip" install -q -r "$HOME/.config/ice/requirements.txt"
+ln -sf "$HOME/.config/ice/ice-serve" "$HOME/.local/bin/ice-serve"
+
+echo "#> Pre-downloading classifier model..."
+"$ICE_DIR/venv/bin/python" -c "
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+AutoTokenizer.from_pretrained('protectai/deberta-v3-base-prompt-injection-v2')
+AutoModelForSequenceClassification.from_pretrained('protectai/deberta-v3-base-prompt-injection-v2')
+"
+echo "#> ICE model downloaded"
+
+mkdir -p ~/.config/systemd/user
+ln -sf ~/.config/ice/ice.service ~/.config/systemd/user/ice.service
+
+# ──────────────────────────────────────────────
 # Tuwunel (Matrix server)
 # ──────────────────────────────────────────────
 echo "#> Setting up tuwunel..."
 
 mkdir -p ~/.local/share/tuwunel
-mkdir -p ~/.config/systemd/user
 ln -sf ~/.config/tuwunel/tuwunel.service ~/.config/systemd/user/tuwunel.service
 systemctl --user daemon-reload
-systemctl --user enable tuwunel
-systemctl --user start tuwunel
+systemctl --user enable tuwunel ice
+systemctl --user start tuwunel ice
 
 sleep 2
 if curl -sf http://localhost:8008/_matrix/client/versions >/dev/null; then

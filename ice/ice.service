@@ -1,0 +1,12 @@
+[Unit]
+Description=ICE Prompt Injection Classifier
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/ice-serve
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
