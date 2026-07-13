@@ -1,2 +1,0 @@
-- [feedback_agent_lifecycle.md](feedback_agent_lifecycle.md) — Jack agents don't need to understand their own lifecycle mechanics
-- [project_team_scopes.md](project_team_scopes.md) — Which jack teams work on which kinds of projects
