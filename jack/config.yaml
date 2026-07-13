@@ -1,55 +1,10 @@
-classifier:
-  endpoint: "unix:///run/user/1000/ice.sock"
-matrix:
-  homeserver: http://localhost:8008
-  registration_token: jack
-  board_auto_join: "^flatline$"
-
 profiles:
-  rockhopper:
-    git:
-      name: ROCKHOPPER
-      email: rockhopper@zoobz.io
-    github:
-      user: rockhopper-zbz
-    ssh:
-      key: ~/.ssh/rockhopper
-
-  nebuchadnezzar:
-    git:
-      name: NEBUCHADNEZZAR
-      email: nebuchadnezzar@zoobz.io
-    github:
-      user: nebuchadnezzar-zbz
-    ssh:
-      key: ~/.ssh/nebuchadnezzar
-
-  wintermute:
-    git:
-      name: WINTERMUTE
-      email: wintermute@zoobz.io
-    github:
-      user: wintermute-zbz
-    ssh:
-      key: ~/.ssh/wintermute
-
-  enterprise:
-    git:
-      name: ENTERPRISE
-      email: enterprise@zoobz.io
-    github:
-      user: enterprise-zbz
-    ssh:
-      key: ~/.ssh/enterprise
-
   case:
     git:
       name: CASE
       email: case@zoobz.io
     github:
       user: case-zbz
-    ssh:
-      key: ~/.ssh/case
 
   flatline:
     git:
@@ -57,5 +12,10 @@ profiles:
       email: flatline@zoobz.io
     github:
       user: flatline-zbz
-    ssh:
-      key: ~/.ssh/flatline
+
+  wintermute:
+    git:
+      name: WINTERMUTE
+      email: wintermute@zoobz.io
+    github:
+      user: wintermute-zbz

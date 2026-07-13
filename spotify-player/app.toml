@@ -5,10 +5,13 @@
 # Daemon mode: `spotify_player -d`
 # CLI commands: `spotify_player playback`, `spotify_player get`, etc.
 
-[client]
-# Register an app at https://developer.spotify.com/dashboard
-# Redirect URI: http://localhost:8080/callback
-client_id = "b46ebe555afa4be3af3f2247e44f6ac7"
+# Use spotify_player's recommended built-in client (ncspot's, extended-quota
+# mode). The docs advise AGAINST a custom client_id (newly-registered apps hit
+# 429/403). This is also the client the `authenticate` flow uses internally, so
+# streaming + Web API share one pre-registered client and NO Spotify dashboard
+# setup is needed. client_id must be a TOP-LEVEL key (no [client] table).
+client_id = "65b708073fc0480ea92a077233ca87bd"
+theme = "dracula"
 
 [device]
 name = "spotify_player"

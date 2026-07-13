@@ -18,18 +18,15 @@ return {
 
 	-- ui improvements
 	{
-		"stevearc/dressing.nvim",
-		lazy = true,
-		init = function()
-			vim.ui.select = function(...)
-				require("lazy").load({ plugins = { "dressing.nvim" } })
-				return vim.ui.select(...)
-			end
-			vim.ui.input = function(...)
-				require("lazy").load({ plugins = { "dressing.nvim" } })
-				return vim.ui.input(...)
-			end
-		end,
+		"folke/snacks.nvim",
+		priority = 1000,
+		lazy = false,
+		opts = {
+			-- replaces vim.ui.input (fixes telescope-file-browser focus bug)
+			input = { enabled = true },
+			-- replaces vim.ui.select
+			picker = { enabled = true },
+		},
 	},
 
 	-- notifications

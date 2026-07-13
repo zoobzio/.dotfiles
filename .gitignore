@@ -29,6 +29,9 @@ claude/tasks/
 claude/teams/
 claude/telemetry/
 claude/todos/
+claude/daemon*
+claude/jobs
+claude/.last*
 
 ## JACK 
 *.age

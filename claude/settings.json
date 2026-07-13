@@ -4,7 +4,9 @@
   },
   "alwaysThinkingEnabled": true,
   "promptSuggestionEnabled": false,
-  "voiceEnabled": true,
   "skipDangerousModePermissionPrompt": true,
-  "teammateMode": "in-process"
+  "skipWorkflowUsageWarning": true,
+  "teammateMode": "in-process",
+  "voiceEnabled": true,
+  "model": "claude-fable-5[1m]"
 }
