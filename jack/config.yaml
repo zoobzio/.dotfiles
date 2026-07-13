@@ -1,3 +1,4 @@
+model: claude-opus-4-8
 profiles:
   case:
     git:
@@ -6,16 +7,30 @@ profiles:
     github:
       user: case-zbz
 
-  flatline:
+  dixie:
     git:
-      name: FLATLINE
+      name: DIXIE
       email: flatline@zoobz.io
     github:
       user: flatline-zbz
 
-  wintermute:
+  riviera:
     git:
-      name: WINTERMUTE
-      email: wintermute@zoobz.io
+      name: RIVIERA
+      email: riviera@zoobz.io
     github:
-      user: wintermute-zbz
+      user: riviera-zbz
+
+  armitage:
+    git:
+      name: ARMITAGE
+      email: armitage@zoobz.io
+    github:
+      user: armitage-zbz
+
+  molly:
+    git:
+      name: MOLLY
+      email: molly@zoobz.io
+    github:
+      user: molly-zbz
