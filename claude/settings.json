@@ -2,10 +2,20 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "autoMemoryEnabled": false,
+  "autoDreamEnabled": false,
+  "workflowKeywordTriggerEnabled": false,
   "alwaysThinkingEnabled": true,
   "promptSuggestionEnabled": false,
+  "awaySummaryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
+  "showTurnDuration": false,
+  "terminalProgressBarEnabled": false,
   "teammateMode": "in-process",
-  "voiceEnabled": true
+  "voiceEnabled": true,
+  "model": "claude-fable-5[1m]"
 }
