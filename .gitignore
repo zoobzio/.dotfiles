@@ -32,6 +32,7 @@ claude/todos/
 claude/daemon*
 claude/jobs
 claude/.last*
+claude/skills/synced
 
 ## JACK 
 *.age

@@ -5,17 +5,17 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "autoMemoryEnabled": false,
-  "autoDreamEnabled": false,
+  "model": "fable[1m]",
   "workflowKeywordTriggerEnabled": false,
   "alwaysThinkingEnabled": true,
   "promptSuggestionEnabled": false,
   "awaySummaryEnabled": false,
+  "autoMemoryEnabled": false,
+  "autoDreamEnabled": false,
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
   "showTurnDuration": false,
   "terminalProgressBarEnabled": false,
   "teammateMode": "in-process",
-  "voiceEnabled": true,
-  "model": "claude-fable-5[1m]"
+  "voiceEnabled": true
 }
