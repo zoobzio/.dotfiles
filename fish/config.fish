@@ -26,6 +26,7 @@ alias clip "xclip -selection clipboard"
 alias dock lazydocker
 
 set -gx BROWSER google-chrome-stable
+set -gx EDITOR nvim
 
 starship init fish | source
 

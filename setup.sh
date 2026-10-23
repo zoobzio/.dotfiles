@@ -106,6 +106,26 @@ else
 fi
 
 # ──────────────────────────────────────────────
+# Language servers for nvim (binary:npm-package)
+# vue_ls must be >= 3.x to match the nvim-lspconfig definition.
+# ──────────────────────────────────────────────
+for entry in \
+    oxlint:oxlint \
+    oxfmt:oxfmt \
+    typescript-language-server:typescript-language-server \
+    vue-language-server:@vue/language-server@latest \
+    :@vue/typescript-plugin@latest; do
+    bin="${entry%%:*}"
+    pkg="${entry#*:}"
+    if [ -z "$bin" ] || ! command -v "$bin" &>/dev/null; then
+        echo "#> Installing $pkg..."
+        npm install -g "$pkg"
+    else
+        echo "#> $pkg already installed"
+    fi
+done
+
+# ──────────────────────────────────────────────
 # Fish shell
 # ──────────────────────────────────────────────
 echo "#> Setting up fish..."

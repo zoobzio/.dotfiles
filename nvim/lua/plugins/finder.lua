@@ -2,6 +2,7 @@ return {
 	-- Aerial
 	{
 		"stevearc/aerial.nvim",
+		branch = "nvim-0.11",
 		opts = {},
 	},
 

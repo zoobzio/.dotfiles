@@ -1,0 +1,32 @@
+{
+  "draft_id": "721ef91e-d746-4654-a54a-5218c312ca69",
+  "created_at": "2026-10-04T19:19:55.431Z",
+  "source_session_id": "4aa658b1-f744-481c-80af-c6918886dd2f",
+  "cwd": "/home/zoobzio/code/flubber/packages/core",
+  "model": "claude-fable-5-1",
+  "cli_version": "2.1.289",
+  "os": "linux x64",
+  "request_ids": [
+    "req_011Cfhj8bAS6Znh2cHUk5k65",
+    "req_011Cfhj937tHrgVqGXBZuceP",
+    "req_011Cfhjk2KkEKLdVex2gpZML"
+  ],
+  "type": "bug",
+  "title": "Over-hedged a design question by presenting three options instead of doing the obvious fix",
+  "details": "- **What happened:** Asked why the FormatJS parser ships at runtime and whether there is an alternative, the model had already verified a working fix (aliasing to the no-parser entry) but presented three options and asked the user to choose, treating an earlier passing remark (\"driven by formatjs\") as a constraint.\n- **What the user said:** \"we don't have to treat something I said in passing as some kind of contract. if there are better options we should use them? I don't need you to hedge in every direction - why wouldn't we just use the no-parser entry you used to test?\"\n- **Repro:** Design discussion in a greenfield repo; model measures a fix that works, then replies with an options list and \"Which way do you want to go?\" instead of applying it.",
+  "area": "design discussion",
+  "failure_mode": "excessive_questions",
+  "task_category": "plan",
+  "trigger": "model_judgment",
+  "effort": "high",
+  "thinking_type": "adaptive",
+  "message_count": 254,
+  "assistant_turn_count": 54,
+  "subagent_count": 0,
+  "transcript_ref": {
+    "session_file": "/home/zoobzio/.claude/projects/-home-zoobzio-code-flubber/4aa658b1-f744-481c-80af-c6918886dd2f.jsonl",
+    "message_range": null,
+    "project_dir_key": "-home-zoobzio-code-flubber"
+  },
+  "status": "queued"
+}

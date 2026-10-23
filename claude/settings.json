@@ -5,8 +5,9 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "model": "fable[1m]",
+  "model": "fable",
   "workflowKeywordTriggerEnabled": false,
+  "feedbackDrafts": "off",
   "alwaysThinkingEnabled": true,
   "promptSuggestionEnabled": false,
   "awaySummaryEnabled": false,

@@ -43,21 +43,35 @@ local function setup_theme()
 end
 
 local function setup_diagnostics()
+	-- Signs are configured through vim.diagnostic.config (sign_define is deprecated).
+	-- texthl defaults to DiagnosticSign<Severity>, which the hi commands above style.
+	local signs = icons.diagnostics
+	local S = vim.diagnostic.severity
 	vim.diagnostic.config({
 		virtual_text = false,
+		signs = {
+			text = {
+				[S.ERROR] = signs.Error,
+				[S.WARN] = signs.Warn,
+				[S.HINT] = signs.Hint,
+				[S.INFO] = signs.Info,
+			},
+			numhl = {
+				[S.ERROR] = "",
+				[S.WARN] = "",
+				[S.HINT] = "",
+				[S.INFO] = "",
+			},
+		},
 	})
-	local signs = icons.diagnostics
-	for type, icon in pairs(signs) do
-		local hl = "DiagnosticSign" .. type
-		vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-	end
 end
 
 local function setup_formatter()
 	local formatGroup = vim.api.nvim_create_augroup("FormatGroup", { clear = true })
 	vim.api.nvim_create_autocmd(
 		{ "BufWritePre" },
-		{ pattern = "*.vue,*.ts,*.js,*.mjs,*,cjs,*.json,*.yaml,*.lua,*.go,*.py", command = "Neoformat", group = formatGroup }
+		-- JS/TS/JSON/YAML/Vue are formatted by the oxfmt LSP (see plugins/lsp.lua)
+		{ pattern = "*.lua,*.go,*.py", command = "Neoformat", group = formatGroup }
 	)
   vim.api.nvim_create_autocmd(
     {"BufRead", "BufNewFile"},
